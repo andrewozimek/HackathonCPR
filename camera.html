@@ -23,29 +23,33 @@
   }
   #stage { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: #000; }
   #view { width: 100%; height: 100%; object-fit: contain; display: block; }
-  video { display: none; }
+  /* Kept in the layout (not display:none) so browsers keep delivering frames. */
+  #video { position: absolute; width: 2px; height: 2px; opacity: 0; pointer-events: none; }
 
   /* ---------- HUD ---------- */
   #hud {
     position: fixed; top: 0; left: 0; right: 0;
-    padding: calc(10px + env(safe-area-inset-top)) 12px 10px;
-    display: flex; gap: 10px; align-items: stretch;
+    padding: calc(10px + env(safe-area-inset-top)) 10px 10px;
+    display: flex; gap: 8px; align-items: stretch;
     background: linear-gradient(to bottom, rgba(0,0,0,0.75), rgba(0,0,0,0));
     pointer-events: none;
   }
   #rateBox {
     background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
-    padding: 8px 14px; min-width: 122px; text-align: center;
+    padding: 8px 12px; min-width: 112px; text-align: center;
+    display: flex; flex-direction: column; justify-content: center;
   }
-  #rateNum { font-size: 56px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
-  #rateLbl { font-size: 12px; color: var(--muted); margin-top: 4px; letter-spacing: 0.04em; text-transform: uppercase; }
-  #chips { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; min-width: 0; }
+  #rateNum { font-size: 54px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+  #rateLbl { font-size: 11px; color: var(--muted); margin-top: 4px; letter-spacing: 0.04em; text-transform: uppercase; }
+  #countLbl { font-size: 13px; font-weight: 700; margin-top: 6px; font-variant-numeric: tabular-nums; }
+  #chips { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 5px; min-width: 0; }
+  @media (min-width: 640px) { #chips { grid-template-columns: 1fr 1fr 1fr; } }
   .chip {
-    background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
-    padding: 6px 10px; min-width: 0; border-left-width: 5px; border-left-color: var(--muted);
+    background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    padding: 5px 9px; min-width: 0; border-left-width: 5px; border-left-color: var(--muted);
   }
-  .chip .k { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
-  .chip .v { font-size: 16px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .chip .k { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+  .chip .v { font-size: 15px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .good { color: var(--good); } .warn { color: var(--warn); } .bad { color: var(--bad); }
   .chip.good { border-left-color: var(--good); color: inherit; }
   .chip.warn { border-left-color: var(--warn); color: inherit; }
@@ -53,7 +57,7 @@
 
   /* ---------- cue banner ---------- */
   #cue {
-    position: fixed; left: 50%; bottom: calc(96px + env(safe-area-inset-bottom));
+    position: fixed; left: 50%; bottom: calc(84px + env(safe-area-inset-bottom));
     transform: translateX(-50%); max-width: 92vw;
     background: var(--panel); border: 1px solid var(--line); border-radius: 999px;
     padding: 12px 22px; font-size: 22px; font-weight: 800; text-align: center;
@@ -64,22 +68,25 @@
   /* ---------- controls ---------- */
   #bar {
     position: fixed; left: 0; right: 0; bottom: 0;
-    padding: 10px 12px calc(12px + env(safe-area-inset-bottom));
-    display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
+    padding: 10px 8px calc(12px + env(safe-area-inset-bottom));
+    display: flex; gap: 6px; justify-content: center;
     background: linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0));
   }
-  button {
+  button, .filebtn {
     font: inherit; font-weight: 700; color: var(--text);
     background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
-    padding: 12px 14px; min-height: 48px; cursor: pointer;
+    padding: 12px 12px; min-height: 48px; cursor: pointer; text-align: center;
   }
-  button:active { transform: scale(0.97); }
+  button:active, .filebtn:active { transform: scale(0.97); }
+  button:disabled { opacity: 0.4; }
   button.primary { background: #e23b3b; border-color: #e23b3b; }
   button[aria-pressed="true"] { border-color: var(--good); color: var(--good); }
+  .filebtn { display: block; }
+  .filebtn input { display: none; }
 
   /* ---------- debug ---------- */
   #debug {
-    position: fixed; left: 12px; right: 12px; bottom: calc(160px + env(safe-area-inset-bottom));
+    position: fixed; left: 10px; right: 10px; bottom: calc(146px + env(safe-area-inset-bottom));
     background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 8px;
     display: none;
   }
@@ -87,18 +94,26 @@
   #graph { width: 100%; height: 90px; display: block; }
   #dbgText { font: 12px/1.4 ui-monospace, Consolas, monospace; color: var(--muted); margin-top: 6px; white-space: pre-wrap; }
 
-  /* ---------- start overlay ---------- */
-  #start {
+  /* ---------- overlays ---------- */
+  .overlay {
     position: fixed; inset: 0; background: var(--bg); z-index: 10;
-    display: flex; align-items: center; justify-content: center; padding: 24px;
+    display: flex; align-items: center; justify-content: center; padding: 24px; overflow: auto;
   }
-  #start .card { max-width: 440px; width: 100%; }
-  #start h1 { font-size: 30px; margin: 0 0 6px; }
-  #start p { color: var(--muted); margin: 0 0 18px; }
-  #start ol { padding-left: 20px; margin: 0 0 22px; line-height: 1.6; }
-  #start button { width: 100%; font-size: 20px; padding: 16px; }
+  .overlay .card { max-width: 440px; width: 100%; }
+  .overlay h1 { font-size: 30px; margin: 0 0 6px; }
+  .overlay p { color: var(--muted); margin: 0 0 18px; }
+  .overlay ol { padding-left: 20px; margin: 0 0 22px; line-height: 1.6; }
+  .overlay button, .overlay .filebtn { width: 100%; font-size: 18px; padding: 15px; margin-top: 10px; }
   #startMsg { margin-top: 12px; font-size: 14px; color: var(--muted); min-height: 20px; }
   #startMsg.bad { color: var(--bad); }
+
+  #summary { display: none; background: rgba(11, 15, 20, 0.94); }
+  #summary.show { display: flex; }
+  #scoreNum { font-size: 84px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+  #scoreLbl { color: var(--muted); margin: 4px 0 18px; }
+  #rows { border-top: 1px solid var(--line); }
+  #rows .row { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  #rows .row b { font-variant-numeric: tabular-nums; }
 </style>
 </head>
 <body>
@@ -111,13 +126,16 @@
 <div id="hud">
   <div id="rateBox">
     <div id="rateNum">--</div>
-    <div id="rateLbl">per min · target 100–120</div>
+    <div id="rateLbl">per min · 100–120</div>
+    <div id="countLbl">0 compressions</div>
   </div>
   <div id="chips">
     <div class="chip" id="cRate"><div class="k">Rate</div><div class="v">Waiting</div></div>
-    <div class="chip" id="cCount"><div class="k">Compressions</div><div class="v">0</div></div>
     <div class="chip" id="cRecoil"><div class="k">Recoil</div><div class="v">--</div></div>
     <div class="chip" id="cElbow"><div class="k">Elbows</div><div class="v">--</div></div>
+    <div class="chip" id="cTilt"><div class="k">Arms over chest</div><div class="v">--</div></div>
+    <div class="chip" id="cPush"><div class="k">Push depth trend</div><div class="v">--</div></div>
+    <div class="chip" id="cHands"><div class="k">Hands-on time</div><div class="v">--</div></div>
   </div>
 </div>
 
@@ -129,23 +147,35 @@
 </div>
 
 <div id="bar">
-  <button id="btnFlip">Flip camera</button>
+  <button id="btnFlip">Flip</button>
   <button id="btnVoice" aria-pressed="true">Voice on</button>
   <button id="btnReset">Reset</button>
+  <button id="btnFinish" class="primary">Finish</button>
   <button id="btnDebug" aria-pressed="false">Debug</button>
 </div>
 
-<div id="start">
+<div id="start" class="overlay">
   <div class="card">
     <h1>CPR Camera Coach</h1>
-    <p>Tracks compression rate, chest recoil and elbow lock.</p>
+    <p>Tracks compression rate, chest recoil, arm position and hands-on time.</p>
     <ol>
       <li>Prop the phone side-on, about 1.5–2 m away.</li>
       <li>Shoulders, elbows and hands must all be in view.</li>
       <li>Turn the volume up, then start compressions.</li>
     </ol>
     <button class="primary" id="btnStart">Start camera</button>
+    <label class="filebtn">Use a recorded video<input type="file" id="fileIn" accept="video/*"></label>
     <div id="startMsg"></div>
+  </div>
+</div>
+
+<div id="summary" class="overlay">
+  <div class="card">
+    <div id="scoreNum">--</div>
+    <div id="scoreLbl">overall score out of 100</div>
+    <div id="rows"></div>
+    <button class="primary" id="btnAgain">Go again</button>
+    <label class="filebtn">Load another video<input type="file" id="fileIn2" accept="video/*"></label>
   </div>
 </div>
 
@@ -160,148 +190,278 @@ const CONFIG = {
   RATE_WINDOW: 5,           // how many recent intervals the rate is the median of
   PAUSE_MS: 2500,           // no compression for this long = paused, rate clears
 
+  // Which body part to follow
+  SHOULDER_WEIGHT: 0.6,     // 0 = wrists only, 1 = shoulders only. Shoulders track more reliably than clasped hands.
+
   // Compression detection
-  MIN_TRAVEL: 0.035,        // wrist travel needed to count a push, as a fraction of arm length.
-                            //   Missing real pushes -> lower it. Counting jitter -> raise it.
+  MIN_TRAVEL: 0.03,         // floor: travel needed to count a push, as a fraction of arm length
+  ADAPTIVE_TRAVEL: 0.3,     // once pushing, a push must also be at least this fraction of the recent typical stroke
   MIN_INTERVAL_MS: 270,     // two pushes closer than this are treated as noise (~220/min)
-  SMOOTHING: 0.5,           // 0..1. Lower = smoother but laggier wrist signal.
+  SMOOTHING: 0.5,           // 0..1. Lower = smoother but laggier signal.
 
   // Recoil
-  RECOIL_TOLERANCE: 0.25,   // hands may stop this fraction of a stroke short of the top before it counts as incomplete
-  RECOIL_WINDOW: 12,        // how many recent "top" positions define the full-release height
+  RECOIL_TOLERANCE: 0.25,   // may stop this fraction of a stroke short of full release before it counts as incomplete
+  RECOIL_BASELINE_MS: 30000,// "full release" = the highest point reached in this many ms
+  RECOIL_REF_PCT: 0.2,      // which of those highs counts as "full release": 0 = the very highest, 0.2 ignores jittery outliers
   RECOIL_BAD_COUNT: 3,      // flag recoil when this many ...
   RECOIL_BAD_OF: 5,         // ... of the last N compressions were incomplete
 
-  // Elbows
+  // Posture
   ELBOW_MIN_DEG: 150,       // below this the arms count as bent (180 = perfectly straight)
+  ARM_TILT_MAX_DEG: 20,     // arms leaning more than this from vertical = shoulders not over hands
 
-  // Pose
+  // Fatigue
+  FATIGUE_DROP: 0.7,        // pushes smaller than this fraction of your best = "fading"
+
+  // Hands-on time
+  HANDS_ON_MIN: 0.6,        // guideline minimum fraction of time spent compressing
+  HANDS_ON_AFTER_MS: 10000, // don't judge it until this far into the session
+
+  // Pose + camera
   MIN_VISIBILITY: 0.5,      // landmark confidence needed to trust a joint
   MODEL: 'lite',            // 'lite' (fast, phone-friendly) | 'full' | 'heavy'
+  CAMERA_WIDTH: 960, CAMERA_HEIGHT: 540,
+  CAMERA_FPS: 60,           // asked for, not guaranteed; more frames = finer timing
+  DEFAULT_CAMERA: 'user',   // 'user' = selfie cam (rescuer sees the screen) | 'environment' = back cam
 
   // Voice cues
   WARMUP_COMPRESSIONS: 4,   // say nothing until this many pushes in a row
   CUE_GAP_MS: 4000,         // minimum time between corrective cues
   GOOD_CUE_GAP_MS: 10000,   // minimum time between "good rhythm" cues
-  DEFAULT_CAMERA: 'user',   // 'user' = selfie cam (rescuer sees the screen) | 'environment' = back cam
+
+  // Score weights (must not all be zero)
+  SCORE: { rate: 0.35, recoil: 0.25, handsOn: 0.2, elbows: 0.1, arms: 0.1 },
 };
 
 const CUES = {
   slow:   'Push faster',
   fast:   'Slow down a little',
+  harder: 'Push harder',
   elbow:  'Lock your elbows',
+  tilt:   'Get your shoulders over your hands',
   recoil: 'Let the chest come all the way up',
   good:   'Good rhythm, keep going',
 };
 
+const median = a => {
+  const s = [...a].sort((x, y) => x - y), m = s.length >> 1;
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+};
+
+/* =====================================================================
+   Fuser — blends wrist and shoulder movement into one up/down signal.
+   It adds up frame-to-frame movement, so a joint dropping out for a few
+   frames never makes the signal jump.
+   ===================================================================== */
+class Fuser {
+  constructor(cfg) { this.cfg = cfg; this.reset(); }
+  reset() { this.y = null; this.pw = null; this.ps = null; }
+  push(wristY, shoulderY) {
+    const ws = Math.max(this.cfg.SHOULDER_WEIGHT, 1e-3), ww = Math.max(1 - this.cfg.SHOULDER_WEIGHT, 1e-3);
+    if (this.y === null) {
+      if (wristY == null && shoulderY == null) return null;
+      this.y = wristY ?? shoulderY;
+    } else {
+      let num = 0, den = 0;
+      if (wristY != null && this.pw != null) { num += ww * (wristY - this.pw); den += ww; }
+      if (shoulderY != null && this.ps != null) { num += ws * (shoulderY - this.ps); den += ws; }
+      if (den) this.y += num / den;
+    }
+    this.pw = wristY; this.ps = shoulderY;
+    return this.y;
+  }
+}
+
 /* =====================================================================
    Analyzer — pure logic, no camera or DOM. Feed it one sample per frame.
-   y is the wrist height in pixels (bigger = lower on screen).
+   y is height in pixels (bigger = lower on screen), t is in ms.
    ===================================================================== */
 class Analyzer {
   constructor(cfg) { this.cfg = cfg; this.reset(); }
 
   reset() {
-    this.y = null;            // smoothed wrist y
+    this.y = null;            // smoothed signal
+    this.hist = [];           // recent {t, y}, used to time each push between frames
     this.dir = 0;             // 0 = unknown, 1 = heading down, -1 = heading up
-    this.lo = null; this.hi = null;         // extremes while direction is unknown
-    this.ext = null; this.extT = 0;         // running extreme in current direction
+    this.lo = null; this.hi = null; this.loT = 0; this.hiT = 0;
+    this.ext = null; this.extT = 0;
     this.count = 0;           // total compressions
     this.run = 0;             // compressions since the last pause
     this.intervals = [];
-    this.lastBottomT = null; this.lastBottomY = null;
-    this.tops = [];
-    this.recoilFlags = [];
-    this.recoilPct = null;
-    this.elbow = null;
+    this.lastBottomT = null; this.lastBottomY = null; this.lastTopY = null;
+    this.firstBottomT = null; this.handsOnMs = 0;
+    this.tops = [];           // {t, y} within the recoil baseline window
+    this.recoilFlags = []; this.recoilPct = null;
+    this.strokes = [];        // recent push sizes, as a fraction of arm length
+    this.bestStroke = 0;
+    this.elbow = null; this.tilt = null; this.armLen = 1; this.thr = 0;
+    this.stats = { rated: 0, inRate: 0, recoilJudged: 0, recoilFull: 0, posJudged: 0, elbowOk: 0, tiltOk: 0 };
     this.marks = [];          // {t, y, type} for the debug graph
   }
 
-  push(t, rawY, armLen, elbowDeg) {
+  push(t, rawY, armLen, elbowDeg, tiltDeg) {
     const c = this.cfg;
+    this.armLen = armLen;
     this.y = this.y === null ? rawY : this.y + c.SMOOTHING * (rawY - this.y);
     if (elbowDeg != null) this.elbow = this.elbow === null ? elbowDeg : this.elbow + 0.2 * (elbowDeg - this.elbow);
+    if (tiltDeg != null) this.tilt = this.tilt === null ? tiltDeg : this.tilt + 0.2 * (tiltDeg - this.tilt);
+    this.hist.push({ t, y: this.y });
+    if (this.hist.length > 90) this.hist.shift();
 
     // Paused? Forget the rhythm so a restart is judged fresh.
-    if (this.lastBottomT !== null && t - this.lastBottomT > c.PAUSE_MS && this.run > 0) {
+    if (this.run > 0 && t - this.lastBottomT > c.PAUSE_MS) {
       this.run = 0; this.intervals = []; this.recoilFlags = []; this.recoilPct = null;
+      this.tops = []; this.strokes = [];
     }
 
-    const y = this.y, thr = c.MIN_TRAVEL * armLen;
+    // Threshold: a fixed floor, raised to a share of this person's typical stroke.
+    const typical = this.strokes.length >= 3 ? median(this.strokes) : 0;
+    const thr = this.thr = Math.max(c.MIN_TRAVEL, c.ADAPTIVE_TRAVEL * typical) * armLen;
+    const y = this.y;
 
     if (this.dir === 0) {
       if (this.lo === null) { this.lo = this.hi = y; this.loT = this.hiT = t; return; }
       if (y < this.lo) { this.lo = y; this.loT = t; }
       if (y > this.hi) { this.hi = y; this.hiT = t; }
-      if (y - this.lo > thr) { this._top(this.loT, this.lo); this.dir = 1; this.ext = y; this.extT = t; }
+      if (y - this.lo > thr) { this._top(this._refine(this.loT, this.lo)); this.dir = 1; this.ext = y; this.extT = t; }
       else if (this.hi - y > thr) { this.dir = -1; this.ext = y; this.extT = t; }
       return;
     }
-
     if (this.dir === 1) {                      // going down, looking for the bottom
       if (y >= this.ext) { this.ext = y; this.extT = t; }
-      else if (this.ext - y > thr) { this._bottom(this.extT, this.ext); this.dir = -1; this.ext = y; this.extT = t; }
+      else if (this.ext - y > thr) { this._bottom(this._refine(this.extT, this.ext)); this.dir = -1; this.ext = y; this.extT = t; }
     } else {                                   // coming up, looking for the top
       if (y <= this.ext) { this.ext = y; this.extT = t; }
-      else if (y - this.ext > thr) { this._top(this.extT, this.ext); this.dir = 1; this.ext = y; this.extT = t; }
+      else if (y - this.ext > thr) { this._top(this._refine(this.extT, this.ext)); this.dir = 1; this.ext = y; this.extT = t; }
     }
   }
 
-  _bottom(t, y) {
-    const c = this.cfg;
+  // Fit a curve through the extreme frame and its neighbours to find the true turning point between frames.
+  _refine(t, y) {
+    const h = this.hist, i = h.findIndex(p => p.t === t);
+    if (i <= 0 || i >= h.length - 1) return { t, y };
+    const x0 = h[i - 1].t - t, x2 = h[i + 1].t - t;
+    if (x2 - x0 > 250) return { t, y };        // frames were dropped here; don't guess across the gap
+    const d0 = (h[i - 1].y - y) / x0, d2 = (h[i + 1].y - y) / x2;
+    const a = (d2 - d0) / (x2 - x0);
+    if (!a || !isFinite(a)) return { t, y };
+    const b = d0 - a * x0, xv = -b / (2 * a);
+    if (!(xv > x0 && xv < x2)) return { t, y };
+    return { t: t + xv, y: y - b * b / (4 * a) };
+  }
+
+  _bottom({ t, y }) {
+    const c = this.cfg, st = this.stats;
     if (this.lastBottomT !== null) {
       const dt = t - this.lastBottomT;
       if (dt < c.MIN_INTERVAL_MS) return;      // jitter, not a real push
       if (dt < c.PAUSE_MS) {
         this.intervals.push(dt);
         if (this.intervals.length > c.RATE_WINDOW) this.intervals.shift();
+        this.handsOnMs += dt;
+        const r = 60000 / dt;
+        st.rated++; if (r >= c.RATE_MIN && r <= c.RATE_MAX) st.inRate++;
       }
     }
+    // Push size (skipped for the first push of a run, whose start point is unreliable).
+    if (this.run > 0 && this.lastTopY !== null && y > this.lastTopY) {
+      this.strokes.push((y - this.lastTopY) / this.armLen);
+      if (this.strokes.length > 8) this.strokes.shift();
+      if (this.strokes.length >= 5) this.bestStroke = Math.max(this.bestStroke, median(this.strokes));
+    }
+    if (this.elbow !== null || this.tilt !== null) {
+      st.posJudged++;
+      if (this.elbow === null || this.elbow >= c.ELBOW_MIN_DEG) st.elbowOk++;
+      if (this.tilt === null || this.tilt <= c.ARM_TILT_MAX_DEG) st.tiltOk++;
+    }
     this.count++; this.run++;
+    if (this.firstBottomT === null) this.firstBottomT = t;
     this.lastBottomT = t; this.lastBottomY = y;
     this.marks.push({ t, y, type: 'bottom' });
   }
 
-  _top(t, y) {
+  _top({ t, y }) {
     const c = this.cfg;
-    this.tops.push(y);
-    if (this.tops.length > c.RECOIL_WINDOW) this.tops.shift();
+    this.lastTopY = y;
     this.marks.push({ t, y, type: 'top' });
-    if (this.lastBottomY === null || this.run === 0) return;
+    if (this.run === 0 || this.lastBottomY === null) return;   // getting into position, not a release
 
-    // Full release = the highest the hands have been recently.
-    const refTop = Math.min(...this.tops);
+    this.tops.push({ t, y });
+    this.tops = this.tops.filter(p => t - p.t <= c.RECOIL_BASELINE_MS);
+    // Full release = about the highest point reached recently. A low percentile rather than the
+    // single highest, so one jittery frame can't set the bar.
+    const ys = this.tops.map(p => p.y).sort((a, b) => a - b);
+    const refTop = ys[Math.floor((ys.length - 1) * c.RECOIL_REF_PCT)];
     const stroke = this.lastBottomY - refTop;
     if (stroke <= 0) return;
     const shortfall = (y - refTop) / stroke;
     this.recoilPct = Math.max(0, Math.min(1, 1 - shortfall));
-    this.recoilFlags.push(shortfall > c.RECOIL_TOLERANCE);
+    const bad = shortfall > c.RECOIL_TOLERANCE;
+    this.recoilFlags.push(bad);
     if (this.recoilFlags.length > c.RECOIL_BAD_OF) this.recoilFlags.shift();
+    this.stats.recoilJudged++; if (!bad) this.stats.recoilFull++;
+  }
+
+  handsOn(t) {
+    if (this.firstBottomT === null) return null;
+    const total = t - this.firstBottomT;
+    return total > 0 ? Math.min(1, this.handsOnMs / total) : null;
   }
 
   status(t) {
     const c = this.cfg;
-    const active = this.lastBottomT !== null && t - this.lastBottomT <= c.PAUSE_MS && this.run > 0;
+    const active = this.run > 0 && t - this.lastBottomT <= c.PAUSE_MS;
 
-    let rate = null;
+    let rate = null, steadiness = null;
     if (active && this.intervals.length >= 2) {
-      const s = [...this.intervals].sort((a, b) => a - b);
-      const mid = s.length >> 1;
-      const med = s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
-      rate = 60000 / med;
+      rate = 60000 / median(this.intervals);
+      const mean = this.intervals.reduce((a, b) => a + b, 0) / this.intervals.length;
+      const sd = Math.sqrt(this.intervals.reduce((a, b) => a + (b - mean) ** 2, 0) / this.intervals.length);
+      steadiness = sd / mean;                  // 0 = perfectly even rhythm
     }
     const rateState = rate === null ? 'none' : rate < c.RATE_MIN ? 'slow' : rate > c.RATE_MAX ? 'fast' : 'good';
 
     let recoilState = 'none';
-    if (active && this.recoilFlags.length >= 2) {
-      const bad = this.recoilFlags.filter(Boolean).length;
-      recoilState = bad >= c.RECOIL_BAD_COUNT ? 'bad' : 'good';
-    }
+    if (active && this.recoilFlags.length >= 2)
+      recoilState = this.recoilFlags.filter(Boolean).length >= c.RECOIL_BAD_COUNT ? 'bad' : 'good';
 
     const elbowState = this.elbow === null ? 'none' : this.elbow < c.ELBOW_MIN_DEG ? 'bad' : 'good';
+    const tiltState = this.tilt === null ? 'none' : this.tilt > c.ARM_TILT_MAX_DEG ? 'bad' : 'good';
 
-    return { active, count: this.count, run: this.run, rate, rateState,
-             recoilState, recoilPct: this.recoilPct, elbowDeg: this.elbow, elbowState };
+    let pushState = 'none', pushPct = null;
+    if (active && this.strokes.length >= 5 && this.bestStroke > 0) {
+      pushPct = median(this.strokes) / this.bestStroke;
+      pushState = pushPct < c.FATIGUE_DROP ? 'fading' : 'steady';
+    }
+
+    const handsOn = this.handsOn(t);
+    const handsState = handsOn === null || t - this.firstBottomT < c.HANDS_ON_AFTER_MS ? 'none'
+      : handsOn < c.HANDS_ON_MIN ? 'bad' : 'good';
+
+    return { active, count: this.count, run: this.run, rate, rateState, steadiness,
+             recoilState, recoilPct: this.recoilPct, elbowDeg: this.elbow, elbowState,
+             tiltDeg: this.tilt, tiltState, pushState, pushPct, handsOn, handsState };
+  }
+
+  // End-of-session numbers. Use this to feed the training score and handoff report.
+  summary(t) {
+    const c = this.cfg, st = this.stats, pct = (n, d) => d ? n / d : null;
+    const out = {
+      durationS: this.firstBottomT === null ? 0 : (t - this.firstBottomT) / 1000,
+      compressions: this.count,
+      avgRate: st.rated ? 60000 / (this.handsOnMs / st.rated) : null,
+      rateInTarget: pct(st.inRate, st.rated),
+      fullRecoil: pct(st.recoilFull, st.recoilJudged),
+      elbowsLocked: pct(st.elbowOk, st.posJudged),
+      armsOverChest: pct(st.tiltOk, st.posJudged),
+      handsOn: this.handsOn(t),
+    };
+    const parts = [[out.rateInTarget, c.SCORE.rate], [out.fullRecoil, c.SCORE.recoil],
+                   [out.handsOn, c.SCORE.handsOn], [out.elbowsLocked, c.SCORE.elbows],
+                   [out.armsOverChest, c.SCORE.arms]].filter(p => p[0] !== null);
+    const w = parts.reduce((a, p) => a + p[1], 0);
+    out.score = this.count >= 2 && w ? Math.round(100 * parts.reduce((a, p) => a + p[0] * p[1], 0) / w) : null;
+    return out;
   }
 }
 
@@ -320,13 +480,15 @@ class Coach {
     const issues = [];
     if (s.rateState === 'slow') issues.push('slow');
     if (s.rateState === 'fast') issues.push('fast');
+    if (s.pushState === 'fading') issues.push('harder');
     if (s.elbowState === 'bad') issues.push('elbow');
+    if (s.tiltState === 'bad') issues.push('tilt');
     if (s.recoilState === 'bad') issues.push('recoil');
 
     let key = null;
     if (issues.length) {
       // Don't nag about the same thing twice in a row if something else is also wrong.
-      key = issues[0] === this.lastKey && issues.length > 1 ? issues[1] : issues[0];
+      key = issues.find(k => k !== this.lastKey) ?? issues[0];
     } else if (s.rateState === 'good' && t - this.lastGoodT >= c.GOOD_CUE_GAP_MS) {
       key = 'good'; this.lastGoodT = t;
     }
@@ -335,28 +497,33 @@ class Coach {
   }
 }
 
-// Exposed for testing from the console.
-window.__cpr = { CONFIG, CUES, Analyzer, Coach };
-
 /* =====================================================================
-   Camera + pose + UI
+   Camera / video + pose + UI
    ===================================================================== */
 const $ = id => document.getElementById(id);
 const video = $('video'), view = $('view'), ctx = view.getContext('2d');
 const graph = $('graph'), gctx = graph.getContext('2d');
 
-const L = { lSh: 11, rSh: 12, lEl: 13, rEl: 14, lWr: 15, rWr: 16, lHip: 23, rHip: 24 };
+const L = { lSh: 11, rSh: 12, lEl: 13, rEl: 14, lWr: 15, rWr: 16 };
 const BONES = [[11, 12], [11, 23], [12, 24], [23, 24]];
 const ARMS = [[11, 13], [13, 15], [12, 14], [14, 16]];
 
+const fuser = new Fuser(CONFIG);
 const analyzer = new Analyzer(CONFIG);
 const coach = new Coach(CONFIG);
 
-let landmarker = null, stream = null, running = false;
+let landmarker = null, stream = null;
+let source = null;         // 'camera' | 'file'
+let looping = false, held = false;
 let facing = CONFIG.DEFAULT_CAMERA, voiceOn = true, debugOn = false;
-let lastVideoT = -1, lastTs = 0, armLen = null, cueTimer = 0;
-let samples = [];          // {t, y} for the debug graph
+let lastT = -Infinity, wallClock = false, mpTs = 0, lastVideoT = -1;
+let armLen = null, cueTimer = 0, samples = [];
 let fps = 0, fpsT = 0, fpsN = 0;
+
+function resetAll() {
+  fuser.reset(); analyzer.reset(); coach.reset();
+  samples = []; armLen = null; lastT = -Infinity; wallClock = false;
+}
 
 const MP_VERSION = '0.10.14';
 const loadModel = (async () => {
@@ -375,21 +542,39 @@ const loadModel = (async () => {
   try { return await PoseLandmarker.createFromOptions(fileset, opts('GPU')); }
   catch (e) { console.warn('GPU delegate failed, using CPU', e); return await PoseLandmarker.createFromOptions(fileset, opts('CPU')); }
 })();
-loadModel.catch(() => {});   // surfaced when Start is pressed
+loadModel.catch(() => {});   // surfaced when a source is started
 
-async function openCamera() {
-  if (stream) stream.getTracks().forEach(t => t.stop());
-  stream = await navigator.mediaDevices.getUserMedia({
-    audio: false,
-    video: { facingMode: facing, width: { ideal: 1280 }, height: { ideal: 720 } },
-  });
-  video.srcObject = stream;
+function stopStream() { if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; } }
+
+async function useStream(s) {
+  stopStream();
+  stream = s; source = 'camera';
+  video.removeAttribute('src'); video.srcObject = s; video.loop = false;
   await video.play();
+  resetAll();
+}
+
+async function useCamera() {
+  await useStream(await navigator.mediaDevices.getUserMedia({
+    audio: false,
+    video: {
+      facingMode: facing,
+      width: { ideal: CONFIG.CAMERA_WIDTH }, height: { ideal: CONFIG.CAMERA_HEIGHT },
+      frameRate: { ideal: CONFIG.CAMERA_FPS },
+    },
+  }));
+}
+
+async function useFile(url) {
+  stopStream();
+  source = 'file';
+  video.srcObject = null; video.src = url; video.loop = false;
+  await video.play();
+  resetAll();
 }
 
 function say(key) {
-  const text = CUES[key];
-  const el = $('cue');
+  const text = CUES[key], el = $('cue');
   el.textContent = text;
   el.className = 'show ' + (key === 'good' ? 'good' : 'warn');
   clearTimeout(cueTimer);
@@ -407,28 +592,33 @@ function setChip(id, cls, text) {
   el.className = 'chip ' + cls;
   el.querySelector('.v').textContent = text;
 }
+const P = v => `${Math.round(v * 100)}%`;
 
 function render(s, seen) {
   const rn = $('rateNum');
   rn.textContent = s.rate === null ? '--' : Math.round(s.rate);
   rn.className = s.rateState === 'good' ? 'good' : s.rateState === 'none' ? '' : 'warn';
+  $('countLbl').textContent = `${s.count} compression${s.count === 1 ? '' : 's'}`;
 
-  if (!seen) setChip('cRate', 'bad', "Can't see hands");
+  if (!seen) setChip('cRate', 'bad', "Can't see you");
   else setChip('cRate',
     { none: '', slow: 'warn', fast: 'warn', good: 'good' }[s.rateState],
     { none: s.active ? 'Measuring' : 'Waiting', slow: 'Too slow', fast: 'Too fast', good: 'Good' }[s.rateState]);
 
-  setChip('cCount', '', String(s.count));
+  setChip('cRecoil', { none: '', good: 'good', bad: 'bad' }[s.recoilState],
+    s.recoilState === 'none' ? '--' : (s.recoilState === 'good' ? 'Full ' : 'Incomplete ') + (s.recoilPct === null ? '' : P(s.recoilPct)));
 
-  const pct = s.recoilPct === null ? '' : ` ${Math.round(s.recoilPct * 100)}%`;
-  setChip('cRecoil',
-    { none: '', good: 'good', bad: 'bad' }[s.recoilState],
-    { none: '--', good: 'Full' + pct, bad: 'Incomplete' + pct }[s.recoilState]);
+  setChip('cElbow', { none: '', good: 'good', bad: 'bad' }[s.elbowState],
+    s.elbowState === 'none' ? '--' : (s.elbowState === 'good' ? 'Locked ' : 'Bent ') + Math.round(s.elbowDeg) + '°');
 
-  const deg = s.elbowDeg === null ? '' : ` ${Math.round(s.elbowDeg)}°`;
-  setChip('cElbow',
-    { none: '', good: 'good', bad: 'bad' }[s.elbowState],
-    { none: '--', good: 'Locked' + deg, bad: 'Bent' + deg }[s.elbowState]);
+  setChip('cTilt', { none: '', good: 'good', bad: 'bad' }[s.tiltState],
+    s.tiltState === 'none' ? '--' : (s.tiltState === 'good' ? 'Vertical ' : 'Leaning ') + Math.round(s.tiltDeg) + '°');
+
+  setChip('cPush', { none: '', steady: 'good', fading: 'warn' }[s.pushState],
+    s.pushState === 'none' ? '--' : (s.pushState === 'steady' ? 'Steady ' : 'Fading ') + P(Math.min(1, s.pushPct)));
+
+  setChip('cHands', { none: '', good: 'good', bad: 'bad' }[s.handsState],
+    s.handsOn === null ? '--' : P(s.handsOn));
 }
 
 function angleAt(a, b, c) {               // angle at b, in degrees
@@ -438,7 +628,7 @@ function angleAt(a, b, c) {               // angle at b, in degrees
   return Math.acos(Math.max(-1, Math.min(1, (v1x * v2x + v1y * v2y) / d))) * 180 / Math.PI;
 }
 
-function drawSkeleton(p, vis, elbowBad) {
+function drawSkeleton(p, vis, armsBad) {
   const seg = (a, b, color, w) => {
     if (!vis(a) || !vis(b)) return;
     ctx.strokeStyle = color; ctx.lineWidth = w; ctx.lineCap = 'round';
@@ -446,14 +636,14 @@ function drawSkeleton(p, vis, elbowBad) {
   };
   const w = Math.max(3, view.width / 200);
   BONES.forEach(([a, b]) => seg(a, b, 'rgba(255,255,255,0.75)', w));
-  ARMS.forEach(([a, b]) => seg(a, b, elbowBad ? '#ff5a5a' : '#2fd27a', w * 1.5));
-  for (const i of [11, 12, 13, 14, 23, 24]) {
+  ARMS.forEach(([a, b]) => seg(a, b, armsBad ? '#ff5a5a' : '#2fd27a', w * 1.5));
+  for (const i of [13, 14, 23, 24]) {
     if (!vis(i)) continue;
     ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(p[i].x, p[i].y, w * 1.2, 0, 7); ctx.fill();
   }
-  for (const i of [15, 16]) {
+  for (const i of [11, 12, 15, 16]) {      // the joints the rate is measured from
     if (!vis(i)) continue;
-    ctx.fillStyle = '#ffd400'; ctx.beginPath(); ctx.arc(p[i].x, p[i].y, w * 2.2, 0, 7); ctx.fill();
+    ctx.fillStyle = '#ffd400'; ctx.beginPath(); ctx.arc(p[i].x, p[i].y, w * 2, 0, 7); ctx.fill();
   }
 }
 
@@ -479,39 +669,39 @@ function drawGraph(now) {
   }
 }
 
-function frame() {
-  if (!running) return;
-  requestAnimationFrame(frame);
-  if (video.readyState < 2 || video.currentTime === lastVideoT) return;
-  lastVideoT = video.currentTime;
-
+function process(t) {
   const W = video.videoWidth, H = video.videoHeight;
+  if (!W || !H || !landmarker || held) return;
   if (view.width !== W || view.height !== H) { view.width = W; view.height = H; }
+  if (t < lastT) resetAll();                // video restarted or seeked backwards
+  lastT = t;
 
-  let now = performance.now();
-  if (now <= lastTs) now = lastTs + 1;      // MediaPipe needs strictly increasing timestamps
-  lastTs = now;
-
-  const res = landmarker.detectForVideo(video, now);
+  mpTs = Math.max(mpTs + 1, performance.now());   // MediaPipe needs strictly increasing timestamps
+  const res = landmarker.detectForVideo(video, mpTs);
   const lm = res.landmarks && res.landmarks[0];
 
+  const mirror = source === 'camera' && facing === 'user';
   ctx.save();
-  if (facing === 'user') { ctx.translate(W, 0); ctx.scale(-1, 1); }   // mirror the selfie cam
+  if (mirror) { ctx.translate(W, 0); ctx.scale(-1, 1); }
   ctx.drawImage(video, 0, 0, W, H);
 
-  let seen = false, rawY = null, elbowDeg = null;
+  let seen = false, wristY = null, shoulderY = null, elbowDeg = null, tiltDeg = null;
   if (lm) {
     const p = lm.map(k => ({ x: k.x * W, y: k.y * H, v: k.visibility ?? 1 }));
     const vis = i => p[i].v >= CONFIG.MIN_VISIBILITY;
+    const avgY = ids => { const v = ids.filter(vis); return v.length ? v.reduce((a, i) => a + p[i].y, 0) / v.length : null; };
 
-    // Wrist height: average of whichever wrists we can trust.
-    const wr = [L.lWr, L.rWr].filter(vis);
-    if (wr.length) { rawY = wr.reduce((a, i) => a + p[i].y, 0) / wr.length; seen = true; }
+    wristY = avgY([L.lWr, L.rWr]);
+    shoulderY = avgY([L.lSh, L.rSh]);
+    seen = wristY !== null || shoulderY !== null;
 
     // Arm length (shoulder -> wrist) is the ruler that makes thresholds distance-independent.
-    const lens = [], angs = [];
+    const lens = [], angs = [], tilts = [];
     for (const [sh, el, w] of [[L.lSh, L.lEl, L.lWr], [L.rSh, L.rEl, L.rWr]]) {
-      if (vis(sh) && vis(w)) lens.push(Math.hypot(p[sh].x - p[w].x, p[sh].y - p[w].y));
+      if (vis(sh) && vis(w)) {
+        lens.push(Math.hypot(p[sh].x - p[w].x, p[sh].y - p[w].y));
+        tilts.push(Math.atan2(Math.abs(p[sh].x - p[w].x), Math.max(1e-6, p[w].y - p[sh].y)) * 180 / Math.PI);
+      }
       if (vis(sh) && vis(el) && vis(w)) { const a = angleAt(p[sh], p[el], p[w]); if (a !== null) angs.push(a); }
     }
     if (lens.length) {
@@ -519,62 +709,134 @@ function frame() {
       armLen = armLen === null ? len : armLen + 0.05 * (len - armLen);
     }
     if (angs.length) elbowDeg = angs.reduce((a, b) => a + b, 0) / angs.length;
+    if (tilts.length) tiltDeg = tilts.reduce((a, b) => a + b, 0) / tilts.length;
 
-    if (seen && armLen) {
-      analyzer.push(now, rawY, armLen, elbowDeg);
-      samples.push({ t: now, y: analyzer.y });
+    const y = fuser.push(wristY, shoulderY);
+    if (seen && y !== null && armLen) {
+      analyzer.push(t, y, armLen, elbowDeg, tiltDeg);
+      samples.push({ t, y: analyzer.y });
     }
-    drawSkeleton(p, vis, analyzer.elbow !== null && analyzer.elbow < CONFIG.ELBOW_MIN_DEG);
+    drawSkeleton(p, vis,
+      (analyzer.elbow !== null && analyzer.elbow < CONFIG.ELBOW_MIN_DEG) ||
+      (analyzer.tilt !== null && analyzer.tilt > CONFIG.ARM_TILT_MAX_DEG));
   }
   ctx.restore();
 
-  const s = analyzer.status(now);
+  const s = analyzer.status(t);
   render(s, seen);
-  const key = coach.pick(now, s);
+  const key = coach.pick(t, s);
   if (key) say(key);
 
+  const now = performance.now();
   fpsN++;
   if (now - fpsT > 1000) { fps = fpsN * 1000 / (now - fpsT); fpsN = 0; fpsT = now; }
   if (debugOn) {
-    drawGraph(now);
+    drawGraph(t);
+    const f = v => v === null || v === undefined ? '-' : v.toFixed(0);
     $('dbgText').textContent =
-      `fps ${fps.toFixed(0)}  video ${W}x${H}  pose ${lm ? 'yes' : 'NO'}  hands ${seen ? 'yes' : 'NO'}\n` +
-      `wristY ${rawY === null ? '-' : rawY.toFixed(0)}  armLen ${armLen ? armLen.toFixed(0) : '-'}px  ` +
-      `threshold ${armLen ? (CONFIG.MIN_TRAVEL * armLen).toFixed(1) : '-'}px\n` +
-      `intervals ${analyzer.intervals.map(v => v.toFixed(0)).join(' ') || '-'} ms  run ${s.run}\n` +
-      `recoil flags ${analyzer.recoilFlags.map(f => f ? 'x' : 'o').join('') || '-'}  elbow ${s.elbowDeg === null ? '-' : s.elbowDeg.toFixed(0)}`;
+      `analysed fps ${fps.toFixed(0)}  video ${W}x${H}  source ${source}  clock ${wallClock ? 'wall' : 'media'}\n` +
+      `pose ${lm ? 'yes' : 'NO'}  wrists ${wristY === null ? 'NO' : 'yes'}  shoulders ${shoulderY === null ? 'NO' : 'yes'}  armLen ${f(armLen)}px\n` +
+      `threshold ${analyzer.thr.toFixed(1)}px  strokes ${analyzer.strokes.map(v => (v * analyzer.armLen).toFixed(0)).join(' ') || '-'} px\n` +
+      `intervals ${analyzer.intervals.map(v => v.toFixed(0)).join(' ') || '-'} ms  unevenness ${s.steadiness === null ? '-' : P(s.steadiness)}\n` +
+      `recoil ${analyzer.recoilFlags.map(x => x ? 'x' : 'o').join('') || '-'}  elbow ${f(s.elbowDeg)}  tilt ${f(s.tiltDeg)}  run ${s.run}`;
   }
 }
 
-/* ---------- buttons ---------- */
-$('btnStart').onclick = async () => {
+function loop() {
+  if (video.requestVideoFrameCallback) {
+    video.requestVideoFrameCallback((now, meta) => {
+      // Use the frame's own timestamp, not the time we got round to processing it.
+      let t = meta.mediaTime * 1000;
+      if (source === 'camera' && (wallClock || t <= lastT)) { wallClock = true; t = meta.expectedDisplayTime; }
+      try { process(t); } catch (e) { console.error(e); }
+      loop();
+    });
+  } else {
+    requestAnimationFrame(() => {
+      if (video.readyState >= 2 && video.currentTime !== lastVideoT) {
+        lastVideoT = video.currentTime;
+        try { process(source === 'file' ? video.currentTime * 1000 : performance.now()); } catch (e) { console.error(e); }
+      }
+      loop();
+    });
+  }
+}
+
+async function begin(open) {
   const msg = $('startMsg');
   msg.className = ''; msg.textContent = 'Loading pose model…';
   $('btnStart').disabled = true;
   try {
     if ('speechSynthesis' in window) speechSynthesis.speak(new SpeechSynthesisUtterance(''));  // unlock audio on mobile
     landmarker = await loadModel;
-    msg.textContent = 'Opening camera…';
-    await openCamera();
+    msg.textContent = 'Opening…';
+    await open();
     try { await navigator.wakeLock?.request('screen'); } catch {}
     $('start').style.display = 'none';
-    running = true;
-    requestAnimationFrame(frame);
+    $('summary').classList.remove('show');
+    $('btnFlip').disabled = source !== 'camera';
+    held = false; msg.textContent = '';
+    if (!looping) { looping = true; loop(); }
   } catch (e) {
     console.error(e);
     msg.className = 'bad';
-    msg.textContent = !navigator.mediaDevices
+    msg.textContent = source !== 'file' && !navigator.mediaDevices
       ? 'Camera needs HTTPS (or localhost). Open this page over https://.'
       : e.name === 'NotAllowedError' ? 'Camera permission was blocked. Allow it and try again.'
       : e.name === 'NotFoundError' ? 'No camera found on this device.'
       : 'Could not start: ' + (e.message || e.name);
+    $('start').style.display = '';
+    $('summary').classList.remove('show');
+  } finally {
     $('btnStart').disabled = false;
   }
+}
+
+function showSummary() {
+  const s = analyzer.summary(Math.max(lastT, analyzer.lastBottomT ?? 0));
+  held = true;
+  if ('speechSynthesis' in window) speechSynthesis.cancel();
+  $('scoreNum').textContent = s.score === null ? '--' : s.score;
+  $('scoreNum').className = s.score === null ? '' : s.score >= 80 ? 'good' : s.score >= 60 ? 'warn' : 'bad';
+  const pc = v => v === null ? '--' : P(v);
+  const mm = Math.floor(s.durationS / 60), ss = String(Math.round(s.durationS % 60)).padStart(2, '0');
+  const rows = s.compressions < 2 ? [['No compressions detected', '']] : [
+    ['Time', `${mm}:${ss}`],
+    ['Compressions', s.compressions],
+    ['Average rate', s.avgRate === null ? '--' : `${Math.round(s.avgRate)} / min`],
+    ['Rate in 100–120 target', pc(s.rateInTarget)],
+    ['Full recoil', pc(s.fullRecoil)],
+    ['Hands-on time', pc(s.handsOn)],
+    ['Elbows locked', pc(s.elbowsLocked)],
+    ['Arms over chest', pc(s.armsOverChest)],
+  ];
+  const box = $('rows'); box.textContent = '';
+  for (const [k, v] of rows) {
+    const r = document.createElement('div'); r.className = 'row';
+    const a = document.createElement('span'); a.textContent = k;
+    const b = document.createElement('b'); b.textContent = v;
+    r.append(a, b); box.append(r);
+  }
+  $('summary').classList.add('show');
+  return s;
+}
+
+/* ---------- buttons ---------- */
+$('btnStart').onclick = () => begin(useCamera);
+
+const pickFile = e => {
+  const f = e.target.files[0];
+  if (f) begin(() => useFile(URL.createObjectURL(f)));
+  e.target.value = '';
 };
+$('fileIn').onchange = pickFile;
+$('fileIn2').onchange = pickFile;
+video.addEventListener('ended', () => { if (source === 'file') showSummary(); });
 
 $('btnFlip').onclick = async () => {
+  if (source !== 'camera') return;
   facing = facing === 'user' ? 'environment' : 'user';
-  try { await openCamera(); } catch (e) { console.error(e); facing = facing === 'user' ? 'environment' : 'user'; }
+  try { await useCamera(); } catch (e) { console.error(e); facing = facing === 'user' ? 'environment' : 'user'; }
 };
 
 $('btnVoice').onclick = e => {
@@ -584,13 +846,23 @@ $('btnVoice').onclick = e => {
   if (!voiceOn && 'speechSynthesis' in window) speechSynthesis.cancel();
 };
 
-$('btnReset').onclick = () => { analyzer.reset(); coach.reset(); samples = []; armLen = null; };
+$('btnReset').onclick = resetAll;
+$('btnFinish').onclick = () => { if (source === 'file') video.pause(); showSummary(); };
+
+$('btnAgain').onclick = async () => {
+  $('summary').classList.remove('show');
+  resetAll(); held = false;
+  if (source === 'file') { video.currentTime = 0; try { await video.play(); } catch (e) { console.error(e); } }
+};
 
 $('btnDebug').onclick = e => {
   debugOn = !debugOn;
   e.currentTarget.setAttribute('aria-pressed', debugOn);
   $('debug').classList.toggle('show', debugOn);
 };
+
+// Exposed for testing from the console, and for the main app to read results from.
+window.__cpr = { CONFIG, CUES, Fuser, Analyzer, Coach, analyzer, begin, useStream, useFile, showSummary };
 </script>
 </body>
 </html>
