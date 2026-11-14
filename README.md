@@ -1,6 +1,6 @@
 # CPR Coach (hackathon starter)
 
-One file: `index.html`. All the HTML, CSS and JavaScript are inside it, so it looks the same wherever you open it. No build step, no npm. It's designed for desktop/laptop screens.
+One file: `index.html`. All the HTML, CSS and JavaScript are inside it, so it looks the same wherever you open it. No build step, no npm. It works on desktop, tablet and phone (on phones the pages move to a bottom tab bar and the camera view fills the screen).
 
 `camera.html` is the standalone, full-screen version of the camera coach (phone-friendly). The same coach is built into the **Coach** page of `index.html`.
 
