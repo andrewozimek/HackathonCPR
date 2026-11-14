@@ -19,28 +19,42 @@ Search for these comment headers:
 | Search for | What it controls |
 |---|---|
 | `All styles` | All CSS. Colors are at the top in `:root`. |
-| `config.js` | Settings: `chatUrl`, metronome BPM, rescuer swap time. |
+| `config.js` | Settings: `chatUrl` (the CPR agent), `naturalVoice`, metronome BPM, rescuer swap time. |
+| `agent.js` | The CPR agent: asking, natural voice, hands-free listening, and the assistant bar. |
 | `metronome.js` | Start CPR: 110 bpm beat, 30:2 counter, 2-minute rescuer swap timer, beep and voice. |
 | `learn.js` | Learn tabs, Emergency steps, and the quiz questions (`QUIZ` array). |
-| `chat.js` | Chat box. Placeholder reply until `chatUrl` is set. |
+| `chat.js` | Ask page chat: mic, patient age, read-aloud, sources. |
 | `coach.js` | Camera coach: MediaPipe Pose tracks compression rate, chest recoil and elbow lock, with voice cues. Tuning values are in its `CONFIG` block. |
 | `app.js` | Switches pages using the URL hash (`#coach` is the main page, then `#metronome`, `#emergency`, ...). |
 
 Page content (text, steps, Learn facts) is plain HTML in the `<main>` section, one `<section class="page">` per page.
 
-## Plugging in the RAG assistant
+## The RAG assistant (live)
 
-Set `chatUrl` in the config block to your Cloudflare Worker. The page sends
+The site talks to the CPR RAG agent on Cloudflare: `https://cpr-rag-agent.andrewozimek01.workers.dev/ask` (`chatUrl` in the config block). It uses Workers AI over a knowledge base written from the 2025 AHA CPR guidelines: Llama 3.1 8B for fast answers during CPR, Llama 3.3 70B for fuller explanations, instant pre-written answers for the most common questions, and an optional Deepgram Aura voice.
+
+Where it shows up:
+
+| Where | What it does |
+|---|---|
+| Assistant bar (bottom of every page) | Type a question any time, or tap **Hands-free** once and just talk. Works while the metronome or camera coach is running: answers are short while CPR is going, the coach and metronome voices stay quiet while it answers, and a new question cuts off the old answer. |
+| Ask page | Full chat with explained answers, a tap-to-talk mic, patient age picker, read-aloud and the guideline section each answer came from. |
+
+Request / response (see `agent.js` in index.html):
 
 ```json
-POST /chat
-{ "message": "How deep?", "history": [{ "role": "user", "content": "..." }] }
+POST /ask
+{ "question": "It's a child, what do I do?", "mode": "emergency", "patient": "child",
+  "session": { "rate": 96, "elapsedSeconds": 140 }, "history": [{ "role": "user", "content": "..." }] }
+-> { "answer": "...", "cached": true, "sources": [{ "title": "...", "section": "Child CPR", "score": 0.96 }], "latencyMs": 120 }
+
+POST /tts   { "text": "..." }   -> MP3 audio
 ```
 
-and expects `{ "reply": "...", "sources": ["optional"] }`. Same idea as the HEARTS worker: BM25 over a CPR JSON knowledge base, top passages into the Gemini prompt, return the answer. Add CORS headers (`Access-Control-Allow-Origin: *`) on the worker.
+Answers are spoken in the camera coach's British voice (`VOICE_NAMES` in the coach config), so the coach, metronome and assistant all sound like one coach. Set `naturalVoice: true` in the config to use the agent's Deepgram AI voice instead (about a second slower). If `chatUrl` is empty, the Ask page falls back to offline placeholder replies. Voice questions need Chrome or Edge; other browsers can still type. The agent's own test page is at `https://cpr-rag-agent.andrewozimek01.workers.dev/`.
 
 ## Notes
 
-- The Learn numbers are a placeholder summary. Check them against current AHA / Red Cross guidance before judging.
+- The Learn facts follow the 2025 AHA guidelines (infant compressions use the heel of one hand or two thumbs; the two-finger method was dropped).
 - The camera coach turns the camera off when you leave the Coach page.
 - Every page says it is not a replacement for certified CPR training or for calling 911. Keep that.
