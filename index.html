@@ -824,7 +824,8 @@ window.CPR_CONFIG = {
   /* ---------- hands-free listening: tap once, then just talk ---------- */
   // Phrases the site itself says out loud, so the mic never sends them as questions.
   const OWN_PHRASES = ["give two breaths", "start compressions", "switch rescuers", "push faster", "slow down",
-    "lock your elbows", "let the chest come all the way up", "good rhythm", "push hard and fast", "keep your shoulders"];
+    "lock your elbows", "let the chest come all the way up", "good rhythm", "push hard and fast", "keep your shoulders",
+    "push harder", "shoulders over your hands", "heres your score"];
   const norm = (t) => t.toLowerCase().replace(/[^a-z ]/g, "").replace(/\s+/g, " ").trim();
   const handsFree = (() => {
     let rec = null, on = false, paused = false, quietUntil = 0, micStream = null, handlers = {};
