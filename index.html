@@ -282,6 +282,39 @@ input[type="range"] { width: 100%; accent-color: var(--brand); }
 .chat-form input { flex: 1; font: inherit; color: var(--text); padding: 12px 16px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface-2); outline: none; }
 .chat-form input:focus { border-color: var(--brand); }
 .chat-form button { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; border: none; background: var(--brand); color: #fff; }
+/* ===== CPR agent (voice questions) ===== */
+.chat-form .mic-btn { background: var(--surface-2); color: var(--text); border: 1px solid var(--border); }
+.chat-form .mic-btn.listening { background: var(--brand); color: #fff; border-color: var(--brand); animation: pulse-ring 1.2s infinite; }
+.msg .sources { display: block; margin-top: 8px; font-size: .78rem; color: var(--muted); }
+.chat-opts { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; padding: 0 20px 16px; color: var(--muted); font-size: .85rem; }
+.chat-opts select { font: inherit; color: var(--text); background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px; padding: 6px 12px; }
+@keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(225,29,72,.45); } 100% { box-shadow: 0 0 0 14px rgba(225,29,72,0); } }
+
+/* Always-on assistant bar (every page except Ask, which has the full chat) */
+main { padding-bottom: 150px; }
+.agent-dock { position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); width: min(760px, calc(100vw - 24px)); z-index: 50;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 22px; box-shadow: 0 12px 40px rgba(15,23,42,.18); padding: 10px; }
+body[data-page="assistant"] .agent-dock { display: none; }
+.dock-answer { display: none; position: relative; margin: 2px 4px 10px; padding: 12px 40px 12px 14px; background: var(--blue-soft); border-left: 5px solid var(--blue); border-radius: 14px; }
+.dock-answer.show { display: block; animation: fade .2s ease; }
+.dock-answer .q { font-size: .8rem; color: var(--muted); margin-bottom: 3px; }
+.dock-answer .a { font-weight: 600; font-size: 1.05rem; line-height: 1.45; }
+.dock-answer .x { position: absolute; top: 6px; right: 8px; border: none; background: none; font-size: 1.2rem; color: var(--muted); cursor: pointer; }
+.dock-bar { display: flex; gap: 8px; align-items: center; }
+.dock-mic { flex: none; display: flex; align-items: center; gap: 8px; height: 48px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); font: 600 .9rem var(--font-body); cursor: pointer; white-space: nowrap; }
+.dock-mic .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--muted); }
+.dock-mic[aria-pressed="true"] { background: var(--green-soft); border-color: var(--green); color: var(--green); }
+.dock-mic[aria-pressed="true"] .dot { background: var(--green); animation: pulse-ring 1.4s infinite; }
+.dock-mic.paused .dot { background: var(--amber); animation: none; }
+.dock-form { flex: 1; display: flex; gap: 8px; }
+.dock-form input { flex: 1; min-width: 0; font: inherit; color: var(--text); padding: 12px 16px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface-2); outline: none; }
+.dock-form input:focus { border-color: var(--brand); }
+.dock-form button { flex: none; display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; border: none; background: var(--brand); color: #fff; cursor: pointer; }
+.dock-status { display: flex; justify-content: space-between; gap: 8px; font-size: .78rem; color: var(--muted); padding: 6px 8px 0; min-height: 1.2em; }
+.dock-status .heard { color: var(--text); font-style: italic; }
+.dock-stop { display: none; border: none; background: none; color: var(--brand); font: 600 .78rem var(--font-body); cursor: pointer; padding: 0; }
+.dock-stop.show { display: inline; }
+@media (max-width: 560px) { .dock-mic .lbl { display: none; } }
 
 /* ===== Coach ===== */
 .coach-grid { display: grid; grid-template-columns: 1.6fr 1fr; gap: 20px; align-items: start; }
@@ -483,6 +516,7 @@ footer { display: flex; align-items: center; justify-content: center; text-align
         <span id="stepLabel" class="step-label"></span>
         <button id="stepNext" class="btn primary">Next step</button>
       </div>
+      <p class="note" style="margin:0 0 16px">Have a question while doing CPR? Use the assistant bar at the bottom. Tap <strong>Hands-free</strong> once and just ask out loud.</p>
       <a href="#home" class="btn outline wide"><svg class="icon" width="20" height="20"><use href="#i-pulse"/></svg> Open the compression metronome</a>
     </section>
 
@@ -513,12 +547,12 @@ footer { display: flex; align-items: center; justify-content: center; text-align
         <div class="fact"><span class="fact-icon"><svg class="icon" width="20" height="20"><use href="#i-wind"/></svg></span><div><h4>Breaths</h4><p>30:2 with one rescuer, 15:2 with two.</p></div></div>
       </div>
       <div class="tab-panel" id="tab-infant">
-        <div class="fact"><span class="fact-icon"><svg class="icon" width="20" height="20"><use href="#i-hand"/></svg></span><div><h4>Hands</h4><p>Two fingers, or two thumbs encircling, just below the nipple line. Under age 1.</p></div></div>
+        <div class="fact"><span class="fact-icon"><svg class="icon" width="20" height="20"><use href="#i-hand"/></svg></span><div><h4>Hands</h4><p>Heel of one hand, or two thumbs encircling the chest, just below the nipple line. The two-finger method is no longer recommended. Under age 1.</p></div></div>
         <div class="fact"><span class="fact-icon"><svg class="icon" width="20" height="20"><use href="#i-ruler"/></svg></span><div><h4>Depth</h4><p>About 1.5 in (4 cm), one third of the chest.</p></div></div>
         <div class="fact"><span class="fact-icon"><svg class="icon" width="20" height="20"><use href="#i-pulse"/></svg></span><div><h4>Rate</h4><p>100 to 120 compressions per minute.</p></div></div>
         <div class="fact"><span class="fact-icon"><svg class="icon" width="20" height="20"><use href="#i-wind"/></svg></span><div><h4>Breaths</h4><p>30:2 with one rescuer, 15:2 with two.</p></div></div>
       </div>
-      <p class="note">Placeholder summary. Check against current AHA / Red Cross guidelines before the demo.</p>
+      <p class="note">Based on the 2025 American Heart Association CPR guidelines. Not a substitute for a certified CPR class.</p>
 
       <div class="card quiz-card">
         <div class="quiz-head">
@@ -540,7 +574,7 @@ footer { display: flex; align-items: center; justify-content: center; text-align
       <div class="card chat-card">
         <div class="chat-header">
           <span class="avatar"><svg class="icon" width="20" height="20"><use href="#i-heart"/></svg></span>
-          <div><strong>CPR Assistant</strong><small>Answers from a CPR knowledge base</small></div>
+          <div><strong>CPR Assistant</strong><small>AI answers grounded in the 2025 AHA CPR guidelines</small></div>
         </div>
         <div id="chatLog" class="chat-log">
           <div class="msg bot">Hi! Ask me anything about CPR, AEDs, or this site.</div>
@@ -549,11 +583,19 @@ footer { display: flex; align-items: center; justify-content: center; text-align
           <button class="chip" data-q="How deep should compressions be?">How deep?</button>
           <button class="chip" data-q="How fast should I push?">How fast?</button>
           <button class="chip" data-q="How do I use an AED?">Using an AED</button>
+          <button class="chip" data-q="What changes for a child?">CPR on a child</button>
+          <button class="chip" data-q="How do I help a choking baby?">Choking baby</button>
+          <button class="chip" data-q="I heard a rib crack, should I stop?">Rib cracked?</button>
         </div>
         <form id="chatForm" class="chat-form">
-          <input id="chatInput" type="text" placeholder="Type a question..." autocomplete="off">
+          <input id="chatInput" type="text" placeholder="Type a question, or tap the mic and talk..." autocomplete="off">
+          <button type="button" id="chatMic" class="mic-btn" aria-label="Tap to ask out loud" title="Tap, then ask out loud">&#127908;</button>
           <button type="submit" aria-label="Send"><svg class="icon" width="20" height="20"><use href="#i-send"/></svg></button>
         </form>
+        <div class="chat-opts">
+          <label>Patient <select id="chatPatient"><option value="unknown">Any age</option><option value="adult">Adult</option><option value="child">Child</option><option value="infant">Infant</option></select></label>
+          <label class="switch"><input id="chatSpeak" type="checkbox"><span class="slider"></span> Read answers aloud</label>
+        </div>
       </div>
     </section>
 
@@ -627,6 +669,19 @@ footer { display: flex; align-items: center; justify-content: center; text-align
     </section>
   </main>
 
+  <!-- Always-on CPR assistant: type or talk at any time, even while CPR is running -->
+  <div id="agentDock" class="agent-dock" aria-label="CPR assistant">
+    <div id="dockAnswer" class="dock-answer" aria-live="polite"><button class="x" id="dockClose" aria-label="Hide answer">&times;</button><div class="q"></div><div class="a"></div></div>
+    <div class="dock-bar">
+      <button id="dockMic" class="dock-mic" aria-pressed="false" title="Hands-free: tap once, then just ask out loud"><span class="dot"></span><span class="lbl">Hands-free</span> &#127908;</button>
+      <form id="dockForm" class="dock-form">
+        <input id="dockInput" type="text" placeholder="Ask a CPR question anytime..." autocomplete="off" enterkeyhint="send">
+        <button type="submit" aria-label="Ask"><svg class="icon" width="20" height="20"><use href="#i-send"/></svg></button>
+      </form>
+    </div>
+    <div class="dock-status"><span id="dockStatus">Type a question, or tap Hands-free and just talk. Works while CPR is running.</span><button id="dockStop" class="dock-stop" type="button">Stop talking</button></div>
+  </div>
+
   <footer>
     <span class="brand-mark sm"><svg class="icon" width="20" height="20"><use href="#i-heart"/></svg></span>
     Hackathon prototype. Not medical advice and not a substitute for certified CPR training.
@@ -636,15 +691,292 @@ footer { display: flex; align-items: center; justify-content: center; text-align
 /* ===== config.js ===== */
 // ===== Settings you will most likely change =====
 window.CPR_CONFIG = {
-  // Chat endpoint. Leave empty ("") to use the built-in placeholder reply.
-  // Example once your Cloudflare Worker is deployed:
-  //   chatUrl: "https://cpr-rag-agent.<your-subdomain>.workers.dev/chat"
-  chatUrl: "",
+  // CPR RAG agent (Cloudflare Worker + Workers AI). Leave empty ("") to use the offline placeholder replies.
+  //   (the agent also serves a natural voice at the same address with /tts instead of /ask)
+  chatUrl: "https://cpr-rag-agent.andrewozimek01.workers.dev/ask",
+  naturalVoice: true,   // false = use the browser's built-in voice for answers
 
   // Metronome defaults
   defaultBpm: 110,
   swapSeconds: 120
 };
+</script>
+  <script>
+/* ===== agent.js ===== */
+// Everything that talks to the CPR RAG agent: asking, the voice, hands-free listening,
+// and the always-on assistant bar at the bottom of the page.
+//   POST {chatUrl}  { question, mode: "emergency"|"training", patient?, session?: { rate, elapsedSeconds }, history? }
+//   ->              { answer, cached, sources: [{ title, section, score }], latencyMs }
+//   POST .../tts    { text }  ->  MP3 audio (natural voice)
+(function () {
+  const cfg = window.CPR_CONFIG;
+  const $ = (id) => document.getElementById(id);
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const TTS_URL = cfg.chatUrl ? cfg.chatUrl.replace(/\/ask$/, "/tts") : "";
+  const FALLBACK = "I couldn't reach the assistant. Keep pushing hard and fast in the center of the chest, and follow the 911 dispatcher.";
+
+  async function ask(question, opts = {}) {
+    if (!cfg.chatUrl) return { answer: null, offline: true, sources: [] };
+    const res = await fetch(cfg.chatUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        question,
+        mode: opts.mode || "training",
+        patient: opts.patient || "unknown",
+        session: opts.session || undefined,
+        history: (opts.history || []).slice(-4),
+      }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok && !data.answer) throw new Error("Server error " + res.status);
+    return data;
+  }
+
+  /* ---------- voice out: natural AI voice, with the best browser voice as backup ---------- */
+  const PREFERRED_VOICES = [/Google US English/i, /Natural/i, /Samantha/i, /Ava/i, /Allison/i, /Zoe/i, /Jenny/i, /Aria/i];
+  const player = new Audio();
+  let browserVoice = null, speaking = false, loading = false, speakSeq = 0;
+  function pickVoice() {
+    const en = (window.speechSynthesis ? speechSynthesis.getVoices() : []).filter((v) => /^en[-_]/i.test(v.lang));
+    for (const re of PREFERRED_VOICES) { const v = en.find((x) => re.test(x.name)); if (v) return v; }
+    return en.find((v) => /en[-_]US/i.test(v.lang)) || en[0] || null;
+  }
+  if (window.speechSynthesis) {
+    browserVoice = pickVoice();
+    speechSynthesis.addEventListener?.("voiceschanged", () => { browserVoice = pickVoice(); });
+  }
+  function speechDone() {
+    if (!speaking) return;
+    speaking = false; loading = false;
+    $("dockStop") && $("dockStop").classList.remove("show");
+    handsFree.resume();
+  }
+  function stopSpeaking() {
+    speakSeq++;
+    try { player.pause(); } catch {}
+    if (window.speechSynthesis) speechSynthesis.cancel();
+    speechDone();
+  }
+  function speakBrowser(text) {
+    if (!window.speechSynthesis) { speechDone(); return; }
+    const u = new SpeechSynthesisUtterance(text);
+    if (browserVoice) u.voice = browserVoice;
+    u.rate = 0.98;
+    u.onend = speechDone; u.onerror = speechDone;
+    speechSynthesis.speak(u);
+  }
+  async function speak(text) {
+    if (!text) return;
+    stopSpeaking();
+    const mine = ++speakSeq;
+    speaking = true;
+    $("dockStop") && $("dockStop").classList.add("show");
+    handsFree.pause();                       // don't let the mic hear the answer
+    if (cfg.naturalVoice !== false && TTS_URL) {
+      loading = true;
+      try {
+        const r = await fetch(TTS_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text }) });
+        if (!r.ok) throw new Error("tts " + r.status);
+        const blob = await r.blob();
+        if (mine !== speakSeq) return;       // a newer answer (or Stop) took over
+        player.src = URL.createObjectURL(blob);
+        loading = false;
+        await player.play();
+        return;
+      } catch (err) {
+        console.warn("Natural voice unavailable, using the browser voice", err);
+        loading = false;
+        if (mine !== speakSeq) return;
+      }
+    }
+    speakBrowser(text);
+  }
+  player.onended = speechDone;
+  player.onerror = () => { if (!loading) speechDone(); };
+  // Safety net in case the browser never reports that speech ended.
+  setInterval(() => {
+    if (speaking && !loading && player.paused && (!window.speechSynthesis || (!speechSynthesis.speaking && !speechSynthesis.pending))) speechDone();
+  }, 800);
+
+  /* ---------- hands-free listening: tap once, then just talk ---------- */
+  // Phrases the site itself says out loud, so the mic never sends them as questions.
+  const OWN_PHRASES = ["give two breaths", "start compressions", "switch rescuers", "push faster", "slow down",
+    "lock your elbows", "let the chest come all the way up", "good rhythm", "push hard and fast", "keep your shoulders"];
+  const norm = (t) => t.toLowerCase().replace(/[^a-z ]/g, "").replace(/\s+/g, " ").trim();
+  const handsFree = (() => {
+    let rec = null, on = false, paused = false, handlers = {};
+    function build() {
+      const r = new SR();
+      r.lang = "en-US";
+      r.continuous = true;
+      r.interimResults = true;
+      r.onresult = (e) => {
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+          const res = e.results[i], text = res[0].transcript.trim();
+          if (!res.isFinal) { handlers.onInterim && handlers.onInterim(text); continue; }
+          const n = norm(text);
+          if (n.split(" ").length < 2 || OWN_PHRASES.some((p) => n.includes(p))) continue;
+          handlers.onText && handlers.onText(text);
+        }
+      };
+      r.onerror = (e) => {
+        if (e.error === "not-allowed" || e.error === "service-not-allowed") { on = false; handlers.onState && handlers.onState("denied"); }
+      };
+      r.onend = () => {                 // Chrome stops after a silence; keep listening while hands-free is on
+        if (on && !paused) setTimeout(() => { if (on && !paused) { try { r.start(); } catch {} } }, 250);
+      };
+      return r;
+    }
+    return {
+      supported: !!SR,
+      start(h) {
+        if (!SR) return false;
+        handlers = h || handlers;
+        rec = rec || build();
+        on = true; paused = false;
+        try { rec.start(); } catch {}
+        handlers.onState && handlers.onState("on");
+        return true;
+      },
+      stop() { on = false; paused = false; try { rec && rec.abort(); } catch {} handlers.onState && handlers.onState("off"); },
+      pause() { if (!on || paused) return; paused = true; try { rec.abort(); } catch {} handlers.onState && handlers.onState("paused"); },
+      resume() {
+        if (!on || !paused) return;
+        setTimeout(() => {           // small gap so the tail of the answer isn't picked up
+          if (!on || !paused || speaking) return;
+          paused = false;
+          try { rec.start(); } catch {}
+          handlers.onState && handlers.onState("on");
+        }, 400);
+      },
+      isOn: () => on,
+    };
+  })();
+
+  // One-shot tap-to-talk (the mic on the Ask page): tap, speak, it sends when you stop talking.
+  function tapToTalk(btn, { onText, onNoVoice }) {
+    if (!SR) { btn.addEventListener("click", () => onNoVoice && onNoVoice()); return; }
+    const r = new SR();
+    r.lang = "en-US";
+    r.interimResults = false;
+    let heard = "", listening = false;
+    r.onresult = (e) => { heard = Array.from(e.results).map((x) => x[0].transcript).join(" "); };
+    r.onend = () => {
+      listening = false; btn.classList.remove("listening");
+      if (heard.trim()) onText(heard.trim()); else onNoVoice && onNoVoice();
+      heard = "";
+    };
+    btn.addEventListener("click", () => {
+      if (listening) { try { r.stop(); } catch {} return; }
+      stopSpeaking();
+      heard = ""; listening = true; btn.classList.add("listening");
+      try { r.start(); } catch {}
+    });
+  }
+
+  /* ---------- the always-on assistant bar ---------- */
+  const history = [];
+  let busy = false, hideTimer = 0, askSeq = 0;
+
+  function context() {
+    const m = window.CPR_METRONOME && window.CPR_METRONOME.status ? window.CPR_METRONOME.status() : null;
+    const c = window.CPR_COACH && window.CPR_COACH.status ? window.CPR_COACH.status() : null;
+    const session = {};
+    let active = false;
+    if (c && c.active) {
+      active = true;
+      if (typeof c.rate === "number") session.rate = Math.round(c.rate);
+    }
+    if (m && m.running) {
+      active = true;
+      session.elapsedSeconds = m.elapsedSeconds;
+    }
+    const page = document.body.dataset.page;
+    // Short, action-first answers while CPR is going (or on the Emergency page); fuller answers otherwise.
+    return { session, mode: active || page === "emergency" ? "emergency" : "training" };
+  }
+
+  function showAnswer(q, a, keep) {
+    const box = $("dockAnswer");
+    box.querySelector(".q").textContent = q;
+    box.querySelector(".a").textContent = a;
+    box.classList.add("show");
+    clearTimeout(hideTimer);
+    if (!keep) hideTimer = setTimeout(() => box.classList.remove("show"), 45000);
+  }
+  function setStatus(text, heard) {
+    const el = $("dockStatus");
+    el.textContent = text;
+    if (heard) { const s = document.createElement("span"); s.className = "heard"; s.textContent = heard; el.appendChild(s); }
+  }
+
+  async function dockAsk(q) {
+    q = (q || "").trim();
+    if (!q) return;
+    stopSpeaking();                         // a new question interrupts the old answer
+    const mine = ++askSeq;
+    busy = true;
+    showAnswer(q, "Thinking...", true);
+    const { session, mode } = context();
+    let answer;
+    try {
+      const data = await ask(q, { mode, session, history });
+      answer = data.answer || (data.offline ? "The assistant isn't connected (chatUrl is empty)." : FALLBACK);
+    } catch (err) {
+      console.error(err);
+      answer = FALLBACK;
+    }
+    history.push({ role: "user", content: q }, { role: "assistant", content: answer });
+    if (history.length > 8) history.splice(0, history.length - 8);
+    if (mine !== askSeq) return;            // a newer question is already on its way
+    showAnswer(q, answer);
+    busy = false;
+    speak(answer);
+  }
+
+  function micState(state) {
+    const btn = $("dockMic");
+    btn.setAttribute("aria-pressed", state === "on" || state === "paused");
+    btn.classList.toggle("paused", state === "paused");
+    if (state === "on") setStatus("Listening... just ask your question out loud.");
+    else if (state === "paused") setStatus("Answering...");
+    else if (state === "denied") setStatus("Microphone is blocked. Allow it in the browser's address bar, or type instead.");
+    else setStatus("Type a question, or tap Hands-free and just talk. Works while CPR is running.");
+  }
+
+  window.addEventListener("DOMContentLoaded", () => {
+    $("dockForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const input = $("dockInput");
+      dockAsk(input.value);
+      input.value = "";
+    });
+    $("dockClose").addEventListener("click", () => $("dockAnswer").classList.remove("show"));
+    $("dockStop").addEventListener("click", stopSpeaking);
+    const mic = $("dockMic");
+    if (!handsFree.supported) {
+      mic.title = "Voice questions need Chrome or Edge";
+      mic.addEventListener("click", () => { setStatus("Voice questions need Chrome or Edge. You can still type."); $("dockInput").focus(); });
+      return;
+    }
+    mic.addEventListener("click", () => {
+      if (handsFree.isOn()) { handsFree.stop(); return; }
+      handsFree.start({
+        onText: (t) => dockAsk(t),
+        onInterim: (t) => { if (!busy && !speaking) setStatus("Hearing: ", t); },
+        onState: micState,
+      });
+    });
+  });
+
+  window.CPR_AGENT = {
+    ask, speak, stopSpeaking, tapToTalk, handsFree,
+    isSpeaking: () => speaking,
+    isBusy: () => busy || speaking,   // other voices on the page stay quiet while this is true
+    FALLBACK,
+  };
+})();
 </script>
   <script>
 /* ===== metronome.js ===== */
@@ -662,6 +994,7 @@ window.CPR_CONFIG = {
   let inBreaths = false;
   let swapLeft = cfg.swapSeconds;
   let audioCtx = null;
+  let startedAt = 0;
 
   function beep(freq = 880, ms = 60) {
     if (!$("soundOn").checked) return;
@@ -677,6 +1010,7 @@ window.CPR_CONFIG = {
 
   function say(text) {
     if (!$("voiceOn").checked || !window.speechSynthesis) return;
+    if (window.CPR_AGENT && window.CPR_AGENT.isBusy()) return;   // don't talk over the assistant
     speechSynthesis.cancel();
     speechSynthesis.speak(new SpeechSynthesisUtterance(text));
   }
@@ -742,6 +1076,7 @@ window.CPR_CONFIG = {
 
   function start() {
     running = true;
+    startedAt = Date.now();
     compressions = 0;
     cycles = 0;
     swapLeft = cfg.swapSeconds;
@@ -788,7 +1123,11 @@ window.CPR_CONFIG = {
     });
   });
 
-  window.CPR_METRONOME = { start, stop, isRunning: () => running };
+  window.CPR_METRONOME = {
+    start, stop, isRunning: () => running,
+    // Read by the assistant bar, so answers know CPR is under way.
+    status: () => ({ running, cycles, elapsedSeconds: running ? Math.round((Date.now() - startedAt) / 1000) : 0 }),
+  };
 })();
 </script>
   <script>
@@ -802,7 +1141,7 @@ window.CPR_CONFIG = {
     { q: "What should you do first if someone collapses and is not breathing normally?", choices: ["Call 911 and start CPR", "Wait to see if they wake up", "Give them water"], answer: 0 },
     { q: "What is the compression-to-breath ratio for one rescuer on an adult?", choices: ["15:1", "30:2", "5:1"], answer: 1 },
     { q: "When an AED arrives, you should:", choices: ["Finish 10 more minutes of CPR first", "Turn it on and follow its prompts", "Only use it if you are a doctor"], answer: 1 },
-    { q: "For an infant, you compress with:", choices: ["Two fingers or two thumbs", "Your whole palm with both hands", "Your elbow"], answer: 0 }
+    { q: "For an infant, you compress with:", choices: ["The heel of one hand or two thumbs encircling the chest", "Your whole palm with both hands", "Your elbow"], answer: 0 }
   ];
 
   const $ = (id) => document.getElementById(id);
@@ -861,13 +1200,9 @@ window.CPR_CONFIG = {
 </script>
   <script>
 /* ===== chat.js ===== */
-// Chat UI for the future RAG assistant.
-//
-// Contract with the backend (same idea as the HEARTS Cloudflare Worker):
-//   POST {chatUrl}   body: { "message": "...", "history": [{ "role": "user"|"assistant", "content": "..." }] }
-//   response JSON:   { "reply": "...", "sources": ["optional", "titles"] }
-//
-// If CPR_CONFIG.chatUrl is empty, placeholderReply() answers instead.
+// Chat UI for the CPR RAG assistant (see agent.js for the request format).
+// Uses "training" mode so answers explain the why. If CPR_CONFIG.chatUrl is empty,
+// placeholderReply() answers instead.
 (function () {
   const cfg = window.CPR_CONFIG;
   const $ = (id) => document.getElementById(id);
@@ -895,15 +1230,12 @@ window.CPR_CONFIG = {
   async function ask(message) {
     if (!cfg.chatUrl) {
       await new Promise((r) => setTimeout(r, 400));
-      return { reply: placeholderReply(message) };
+      return { reply: placeholderReply(message), sources: [] };
     }
-    const res = await fetch(cfg.chatUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message, history })
-    });
-    if (!res.ok) throw new Error("Server error " + res.status);
-    return res.json();
+    const data = await window.CPR_AGENT.ask(message, { mode: "training", patient: $("chatPatient").value, history });
+    // Show which guideline sections the answer came from
+    const sources = [...new Set((data.sources || []).map((s) => s.section).filter(Boolean))];
+    return { reply: data.answer, sources };
   }
 
   async function onSubmit(e) {
@@ -917,9 +1249,15 @@ window.CPR_CONFIG = {
     try {
       const data = await ask(message);
       typing.remove();
-      let text = data.reply || "(no reply)";
-      if (data.sources && data.sources.length) text += "\n\nSources: " + data.sources.join(", ");
-      addMsg(text, "bot");
+      const reply = data.reply || "(no reply)";
+      const msg = addMsg(reply, "bot");
+      if (data.sources && data.sources.length) {
+        const src = document.createElement("span");
+        src.className = "sources";
+        src.textContent = "From: " + data.sources.join(" · ");
+        msg.appendChild(src);
+      }
+      if ($("chatSpeak").checked) window.CPR_AGENT.speak(reply);
       history.push({ role: "user", content: message }, { role: "assistant", content: data.reply || "" });
     } catch (err) {
       typing.remove();
@@ -929,8 +1267,13 @@ window.CPR_CONFIG = {
 
   window.addEventListener("DOMContentLoaded", () => {
     $("chatForm").addEventListener("submit", onSubmit);
+    // Tap the mic and ask out loud; it sends when you stop talking, and reads the answer back.
+    window.CPR_AGENT.tapToTalk($("chatMic"), {
+      onText: (text) => { $("chatSpeak").checked = true; $("chatInput").value = text; $("chatForm").requestSubmit(); },
+      onNoVoice: () => $("chatInput").focus(),
+    });
     // Suggested-question chips
-    document.querySelectorAll(".chip").forEach((chip) => {
+    document.querySelectorAll(".chips .chip").forEach((chip) => {
       chip.addEventListener("click", () => {
         $("chatInput").value = chip.dataset.q;
         $("chatForm").requestSubmit();
@@ -1360,6 +1703,7 @@ window.CPR_CONFIG = {
   }
 
   function say(key) {
+    if (window.CPR_AGENT && window.CPR_AGENT.isBusy()) return;   // the assistant is answering a question
     const text = CUES[key];
     const el = $('coachCue');
     el.textContent = text;
@@ -1752,6 +2096,7 @@ window.CPR_CONFIG = {
     const id = (location.hash || "#home").slice(1);
     const page = document.getElementById(id) || document.getElementById("home");
     document.querySelectorAll(".page").forEach((p) => p.classList.toggle("active", p === page));
+    document.body.dataset.page = page.id;
     document.querySelectorAll("nav a").forEach((a) => a.classList.toggle("active", a.getAttribute("href") === "#" + page.id));
     // Prefetch the pose model on the Coach page; release the camera when leaving it.
     if (window.CPR_COACH) {
