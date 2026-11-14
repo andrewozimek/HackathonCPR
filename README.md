@@ -6,7 +6,7 @@ One file: `index.html`. All the HTML, CSS and JavaScript are inside it, so it lo
 
 ## How to open it
 
-- Quickest: double-click `index.html`. Everything works except the camera, which browsers only allow on `localhost` or `https`.
+- Quickest: double-click `index.html`, or press F5 in VS Code ("Open index.html in Chrome"). In Chrome everything works, including the camera. Other browsers may block the camera on a file, so use the local server below.
 - Better (camera works): in this folder run `python3 -m http.server 8000`, then open http://localhost:8000 (or use VS Code "Live Server").
 - To share a live link: drag the folder onto Netlify Drop, or push it to GitHub and turn on GitHub Pages.
 
@@ -24,7 +24,7 @@ Search for these comment headers:
 | `learn.js` | Learn tabs, Emergency steps, and the quiz questions (`QUIZ` array). |
 | `chat.js` | Chat box. Placeholder reply until `chatUrl` is set. |
 | `coach.js` | Camera coach: MediaPipe Pose tracks compression rate, chest recoil and elbow lock, with voice cues. Tuning values are in its `CONFIG` block. |
-| `app.js` | Switches pages using the URL hash (`#home`, `#emergency`, ...). |
+| `app.js` | Switches pages using the URL hash (`#coach` is the main page, then `#metronome`, `#emergency`, ...). |
 
 Page content (text, steps, Learn facts) is plain HTML in the `<main>` section, one `<section class="page">` per page.
 

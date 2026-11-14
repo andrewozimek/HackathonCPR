@@ -3,396 +3,407 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#e11d48">
+  <meta name="theme-color" content="#0a6ebd">
   <title>CPR Coach</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
 /* ===== All styles (colors are in :root) ===== */
 /* ===== Design tokens (change colors here) ===== */
 :root {
-  --brand: #e11d48;          /* rose red */
-  --brand-dark: #be123c;
-  --brand-soft: #ffe4e8;
-  --blue: #2563eb;
-  --blue-soft: #dbeafe;
-  --green: #059669;
-  --green-soft: #d1fae5;
-  --amber: #d97706;
-  --amber-soft: #fef3c7;
-  --amber-text: #92400e;
+  --bg: #f4f7fa;             /* page background */
+  --surface: #ffffff;        /* cards */
+  --surface-2: #eef3f7;
+  --text: #1c2b36;
+  --muted: #5a6b78;
+  --border: #dbe3ea;
+  --primary: #0a6ebd;        /* calm medical blue */
+  --primary-dark: #08589a;
+  --primary-soft: #e5f0fa;
+  --danger: #c8102e;         /* emergency only */
+  --danger-dark: #a00d25;
+  --danger-soft: #fbe9ec;
+  --green: #12805c;
+  --green-soft: #e3f4ed;
+  --amber: #b25e00;
+  --amber-soft: #fdf1e1;
 
-  --bg: #f6f7fb;
-  --surface: #ffffff;
-  --surface-2: #f1f3f8;
-  --text: #0f172a;
-  --muted: #64748b;
-  --border: #e5e7ef;
-
-  --radius: 20px;
-  --radius-sm: 12px;
-  --shadow: 0 1px 2px rgba(15, 23, 42, .04), 0 8px 24px rgba(15, 23, 42, .06);
-  --shadow-lg: 0 20px 40px rgba(225, 29, 72, .25);
-  --font-head: "Plus Jakarta Sans", system-ui, sans-serif;
-  --font-body: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 1px 3px rgba(16, 42, 67, .06);
+  --font: "Source Sans 3", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --brand-soft: #3b0d18;
-    --blue-soft: #172554;
-    --green-soft: #052e22;
-    --amber-soft: #2b1d05;
-    --amber-text: #fcd34d;
-    --bg: #0b0f19;
-    --surface: #131a2a;
-    --surface-2: #1b2336;
-    --text: #e8ecf5;
-    --muted: #94a3b8;
-    --border: #253047;
-    --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px rgba(0, 0, 0, .3);
+    --bg: #0f1720;
+    --surface: #17212c;
+    --surface-2: #1e2a37;
+    --text: #e6edf3;
+    --muted: #9aabb9;
+    --border: #2a3846;
+    --primary: #4b9fe1;
+    --primary-dark: #6bb2ea;
+    --primary-soft: #16304a;
+    --danger: #e5484d;
+    --danger-dark: #f06a6e;
+    --danger-soft: #3a1619;
+    --green: #3fbf8f;
+    --green-soft: #12301f;
+    --amber: #f0a33a;
+    --amber-soft: #33230d;
+    --shadow: none;
   }
 }
 
 /* ===== Base ===== */
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
 body {
   margin: 0;
-  font-family: var(--font-body);
+  font-family: var(--font);
+  font-size: 17px;
   background: var(--bg);
   color: var(--text);
-  line-height: 1.5;
+  line-height: 1.55;
   -webkit-font-smoothing: antialiased;
 }
-h1, h2, h3, h4 { font-family: var(--font-head); line-height: 1.15; margin: 0; letter-spacing: -.01em; }
-a { color: var(--brand); }
-.icon { width: 1.2em; height: 1.2em; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+h1, h2, h3, h4 { line-height: 1.2; margin: 0; font-weight: 700; }
+a { color: var(--primary); }
+.icon { width: 1.15em; height: 1.15em; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
 
 /* ===== Top bar ===== */
 .topbar {
   position: sticky; top: 0; z-index: 1000;
-  display: flex; align-items: center; justify-content: space-between; gap: 16px;
-  padding: 12px 24px;
-  background: color-mix(in srgb, var(--surface) 85%, transparent);
-  backdrop-filter: blur(12px);
+  display: flex; align-items: center; gap: 24px;
+  padding: 0 32px; height: 64px;
+  background: var(--surface);
   border-bottom: 1px solid var(--border);
 }
-.brand { display: flex; align-items: center; gap: 10px; font-family: var(--font-head); font-weight: 800; font-size: 1.15rem; color: var(--text); text-decoration: none; }
-.brand-mark { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 10px; background: var(--brand); color: #fff; }
-.brand-mark .icon { fill: #fff; stroke: none; width: 18px; height: 18px; }
-.brand-mark.sm { width: 22px; height: 22px; border-radius: 6px; display: inline-grid; vertical-align: middle; margin-right: 6px; }
-.brand-mark.sm .icon { width: 12px; height: 12px; }
+.brand { display: flex; align-items: center; gap: 10px; flex-shrink: 0; font-weight: 700; font-size: 1.15rem; color: var(--text); text-decoration: none; }
+.brand-mark { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 8px; background: var(--primary); color: #fff; }
+.brand-mark .icon { width: 18px; height: 18px; stroke-width: 2.5; }
+.brand-mark.sm { width: 22px; height: 22px; border-radius: 6px; }
+.brand-mark.sm .icon { width: 13px; height: 13px; }
 
-.nav { display: flex; gap: 4px; }
-.nav a {
-  display: flex; align-items: center; gap: 6px;
-  padding: 8px 12px; border-radius: 999px;
-  color: var(--muted); text-decoration: none; font-weight: 500; font-size: .92rem;
-  transition: background .15s, color .15s;
-}
+.nav { margin-left: auto; display: flex; align-items: center; gap: 4px; overflow-x: auto; scrollbar-width: none; }
+.nav a { padding: 8px 14px; border-radius: var(--radius-sm); color: var(--muted); text-decoration: none; font-weight: 600; white-space: nowrap; }
 .nav a:hover { background: var(--surface-2); color: var(--text); }
-.nav a.active { background: var(--brand-soft); color: var(--brand); }
-.nav a.nav-emergency { background: var(--brand); color: #fff; font-weight: 600; margin-left: 6px; }
-.nav a.nav-emergency:hover { background: var(--brand-dark); }
+.nav a.active { background: var(--primary-soft); color: var(--primary); }
+.nav-emergency {
+  display: flex; align-items: center; gap: 8px; flex-shrink: 0; white-space: nowrap;
+  padding: 9px 16px; border-radius: var(--radius-sm);
+  background: var(--danger); color: #fff; font-weight: 700; text-decoration: none;
+}
+.nav-emergency:hover { background: var(--danger-dark); }
+.nav-emergency.active { box-shadow: 0 0 0 3px var(--danger-soft); }
 
 .disclaimer {
   display: flex; align-items: center; justify-content: center; gap: 8px;
-  padding: 8px 16px; font-size: .85rem;
-  background: var(--amber-soft); color: var(--amber-text);
+  padding: 8px 16px; text-align: center; font-size: .9rem;
+  background: var(--primary-soft); color: var(--text);
+  border-bottom: 1px solid var(--border);
 }
-.disclaimer a { color: inherit; font-weight: 700; }
+.disclaimer a { color: var(--danger); font-weight: 700; }
+.disclaimer .dot { display: none; }
 
 /* ===== Layout ===== */
-main { max-width: 1080px; margin: 0 auto; padding: 32px 24px 48px; }
-.page { display: none; animation: fade .25s ease; }
+main { max-width: 1080px; margin: 0 auto; padding: 40px 32px 64px; }
+.page { display: none; }
 .page.active { display: block; }
-@keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
-.page-head { margin-bottom: 24px; }
-.eyebrow { display: inline-block; font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--brand); background: var(--brand-soft); padding: 4px 10px; border-radius: 999px; margin-bottom: 12px; }
-.page-head h1 { font-size: clamp(1.9rem, 4vw, 2.8rem); font-weight: 800; }
-.lead { color: var(--muted); font-size: 1.08rem; margin: 10px 0 0; max-width: 60ch; }
-.note { color: var(--muted); font-size: .85rem; margin: 12px 0 0; }
-.section-title { font-size: 1.3rem; margin: 40px 0 16px; }
+.page-head { margin-bottom: 28px; max-width: 720px; }
+.eyebrow { display: block; margin-bottom: 8px; font-size: .85rem; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: .06em; }
+.page-head h1 { font-size: clamp(2rem, 4.5vw, 2.6rem); }
+.page-head h1 br { display: none; }
+.lead { color: var(--muted); font-size: 1.15rem; margin: 10px 0 0; max-width: 60ch; }
+.note { color: var(--muted); font-size: .88rem; margin: 14px 0 0; }
+.section-title { margin: 48px 0 16px; font-size: 1.35rem; }
+.section-title span + span { display: none; }
 
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 24px; }
-.card h3 { font-size: 1.05rem; margin-bottom: 14px; }
+.card h3 { font-size: 1.1rem; margin-bottom: 12px; }
 
 /* ===== Buttons ===== */
 button { font: inherit; color: inherit; cursor: pointer; }
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  padding: 11px 18px; border-radius: var(--radius-sm); border: 1px solid transparent;
-  font-weight: 600; text-decoration: none; transition: transform .1s, background .15s, border-color .15s;
+  min-height: 44px; padding: 0 18px; border-radius: var(--radius-sm); border: 1px solid transparent;
+  font-weight: 600; text-decoration: none; transition: background .15s, border-color .15s;
 }
-.btn:active { transform: scale(.98); }
 .btn:disabled { opacity: .4; cursor: not-allowed; }
-.btn.primary { background: var(--brand); color: #fff; }
-.btn.primary:hover:not(:disabled) { background: var(--brand-dark); }
-.btn.ghost { background: var(--surface-2); color: var(--text); }
-.btn.outline { background: var(--surface); border-color: var(--border); color: var(--text); }
-.btn.outline:hover { border-color: var(--brand); color: var(--brand); }
+.btn.primary { background: var(--primary); color: #fff; }
+.btn.primary:hover:not(:disabled) { background: var(--primary-dark); }
+.btn.ghost { background: var(--surface); border-color: var(--border); color: var(--text); }
+.btn.ghost:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
+.btn.outline { background: var(--surface); border-color: var(--border); color: var(--primary); }
+.btn.outline:hover { border-color: var(--primary); }
 .btn.wide { width: 100%; }
 
 /* ===== Home ===== */
-.home-grid { display: grid; grid-template-columns: 1.3fr 1fr; gap: 20px; }
-.metronome-card { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 36px 24px; }
+.home-grid { display: grid; grid-template-columns: 1.25fr 1fr; gap: 20px; align-items: start; }
+.metronome-card { display: flex; flex-direction: column; padding: 0; overflow: hidden; }
+.panel-bar { display: flex; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid var(--border); color: var(--muted); font-size: .92rem; font-weight: 600; }
 
-.pulse-wrap { position: relative; width: 230px; height: 230px; display: grid; place-items: center; }
-.ring { position: absolute; inset: 0; border-radius: 50%; border: 2px dashed var(--border); }
 .pulse {
-  width: 190px; height: 190px; border-radius: 50%;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  background: radial-gradient(circle at 35% 30%, #fb7185, var(--brand) 70%);
-  color: #fff; box-shadow: var(--shadow-lg);
-  transition: transform .08s ease-out, box-shadow .08s;
+  min-height: 240px; margin: 20px; border-radius: var(--radius);
+  display: flex; align-items: baseline; justify-content: center; gap: 8px; padding-top: 40px;
+  background: var(--surface-2); color: var(--text);
+  transition: background .25s ease-out, color .25s ease-out;
 }
-.pulse.beat { transform: scale(1.1); box-shadow: 0 0 0 18px color-mix(in srgb, var(--brand) 18%, transparent), var(--shadow-lg); }
-.pulse.breath { background: radial-gradient(circle at 35% 30%, #60a5fa, var(--blue) 70%); box-shadow: 0 20px 40px rgba(37, 99, 235, .3); }
-.pulse-count { font-family: var(--font-head); font-size: 4.2rem; font-weight: 800; line-height: 1; }
-.pulse-sub { font-size: .9rem; opacity: .85; }
+.pulse.beat { background: var(--primary); color: #fff; transition: none; }
+.pulse.breath { background: var(--green); color: #fff; }
+.pulse-count { font-size: clamp(6rem, 13vw, 8.5rem); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.pulse-sub { font-size: 1.4rem; opacity: .65; }
 
-.phase { margin: 20px 0 6px; font-family: var(--font-head); font-size: 1.35rem; font-weight: 700; min-height: 1.6em; }
-.phase.swap { color: var(--brand); animation: blink .6s ease-in-out 4; }
+.phase { padding: 0 20px 16px; text-align: center; font-size: 1.35rem; font-weight: 700; min-height: 1.6em; }
+.phase.swap { color: var(--danger); animation: blink .6s ease-in-out 4; }
 @keyframes blink { 50% { opacity: .3; } }
 
-.big-btn {
-  width: 100%; max-width: 360px; margin-top: 14px; padding: 20px;
-  border: none; border-radius: 16px;
-  font-family: var(--font-head); font-size: 1.5rem; font-weight: 800; color: #fff;
-  transition: transform .1s, background .15s;
-}
-.big-btn:active { transform: scale(.98); }
-.big-btn.start { background: var(--brand); box-shadow: var(--shadow-lg); }
-.big-btn.start:hover { background: var(--brand-dark); }
-.big-btn.stop { background: #1e293b; }
+.big-btn { margin: 0 20px 20px; padding: 18px; border: 0; border-radius: var(--radius-sm); font-size: 1.35rem; font-weight: 700; color: #fff; }
+.big-btn.start { background: var(--primary); }
+.big-btn.start:hover { background: var(--primary-dark); }
+.big-btn.stop { background: var(--text); color: var(--surface); }
 
 .side-col { display: flex; flex-direction: column; gap: 20px; }
 .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-.stat { display: flex; align-items: center; gap: 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px; }
-.stat-icon { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 12px; background: var(--blue-soft); color: var(--blue); }
-.stat:nth-child(2) .stat-icon { background: var(--brand-soft); color: var(--brand); }
-.stat .label { display: block; font-size: .8rem; color: var(--muted); }
-.stat .value { display: block; font-family: var(--font-head); font-size: 1.9rem; font-weight: 800; line-height: 1.1; }
+.stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px 20px; }
+.stat .label { display: block; font-size: .9rem; color: var(--muted); }
+.stat .value { display: block; font-size: 2.2rem; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
 
-.controls { display: flex; flex-direction: column; gap: 16px; }
-.controls h3 { margin-bottom: 0; }
-.range { display: flex; flex-direction: column; gap: 8px; font-size: .95rem; }
+.controls { display: flex; flex-direction: column; gap: 18px; }
+.controls h3 { margin: 0; }
+.range { display: flex; flex-direction: column; gap: 8px; }
 .range > span { display: flex; justify-content: space-between; }
-input[type="range"] { width: 100%; accent-color: var(--brand); }
+input[type="range"] { width: 100%; accent-color: var(--primary); }
 
 /* Toggle switch */
-.switch { display: flex; align-items: center; gap: 12px; font-size: .95rem; cursor: pointer; }
+.switch { display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; flex-direction: row-reverse; }
 .switch input { position: absolute; opacity: 0; pointer-events: none; }
 .slider { position: relative; width: 42px; height: 24px; border-radius: 999px; background: var(--border); transition: background .2s; flex-shrink: 0; }
-.slider::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.2); transition: transform .2s; }
-.switch input:checked + .slider { background: var(--brand); }
+.slider::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.2); transition: transform .2s; }
+.switch input:checked + .slider { background: var(--primary); }
 .switch input:checked + .slider::after { transform: translateX(18px); }
-.switch input:focus-visible + .slider { outline: 2px solid var(--brand); outline-offset: 2px; }
+.switch input:focus-visible + .slider { outline: 3px solid var(--primary); outline-offset: 2px; }
 
-/* Tool cards */
-.tool-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 16px; }
-.tool-card {
-  position: relative; display: flex; flex-direction: column; gap: 6px;
-  padding: 20px; border-radius: var(--radius); text-decoration: none; color: var(--text);
-  background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow);
-  transition: transform .15s, border-color .15s;
+/* Tool links */
+.tool-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.tool-list a {
+  display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; align-items: center; height: 100%;
+  padding: 18px 20px; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow);
+  color: var(--text); text-decoration: none; transition: border-color .15s;
 }
-.tool-card:hover { transform: translateY(-3px); border-color: var(--brand); }
-.tool-card h3 { font-size: 1rem; margin-top: 8px; }
-.tool-card p { margin: 0; color: var(--muted); font-size: .88rem; }
-.tool-icon { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 12px; background: var(--surface-2); color: var(--text); }
-.tool-card.danger .tool-icon { background: var(--brand); color: #fff; }
-.tool-go { position: absolute; top: 20px; right: 20px; color: var(--muted); transition: transform .15s, color .15s; }
-.tool-card:hover .tool-go { transform: translateX(3px); color: var(--brand); }
+.tool-list a:hover { border-color: var(--primary); }
+.tool-num { display: none; }
+.tool-list h3 { font-size: 1.1rem; }
+.tool-list p { margin: 0; color: var(--muted); font-size: .95rem; grid-column: 1; }
+.tool-list .icon { grid-column: 2; grid-row: 1 / span 2; color: var(--primary); }
+.tool-list a.danger h3, .tool-list a.danger .icon { color: var(--danger); }
 
 /* ===== Emergency ===== */
 .call-911 {
-  display: flex; align-items: center; gap: 18px;
+  display: flex; align-items: center; justify-content: space-between; gap: 20px;
   padding: 24px 28px; border-radius: var(--radius);
-  background: linear-gradient(135deg, #f43f5e, var(--brand-dark));
-  color: #fff; text-decoration: none; box-shadow: var(--shadow-lg);
+  background: var(--danger); color: #fff; text-decoration: none;
 }
-.call-icon { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 50%; background: rgba(255,255,255,.2); animation: ring 1.6s infinite; }
-.call-icon .icon { width: 30px; height: 30px; }
-@keyframes ring { 0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,.5); } 70% { box-shadow: 0 0 0 16px rgba(255,255,255,0); } }
-.call-911 strong { display: block; font-family: var(--font-head); font-size: clamp(1.6rem, 4vw, 2.3rem); font-weight: 800; }
-.call-911 small { font-size: 1rem; opacity: .9; }
+.call-911 strong { display: block; font-size: clamp(1.8rem, 4.5vw, 2.4rem); font-weight: 700; line-height: 1.1; }
+.call-911 small { display: block; margin-top: 6px; font-size: 1.05rem; opacity: .95; }
+.call-icon { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 50%; background: rgba(255,255,255,.18); flex-shrink: 0; }
+.call-icon .icon { width: 28px; height: 28px; }
 
 .step-progress { height: 6px; background: var(--border); border-radius: 999px; margin: 28px 0 16px; overflow: hidden; }
-.step-bar { height: 100%; width: 0; background: var(--brand); border-radius: 999px; transition: width .3s; }
+.step-bar { height: 100%; width: 0; background: var(--primary); border-radius: 999px; transition: width .3s; }
 .steps { list-style: none; padding: 0; margin: 0; counter-reset: step; }
-.steps li { display: none; counter-increment: step; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 32px; }
-.steps li.current { display: block; animation: fade .25s ease; }
-.steps li::before {
-  content: counter(step); display: grid; place-items: center;
-  width: 48px; height: 48px; border-radius: 14px; margin-bottom: 16px;
-  background: var(--brand-soft); color: var(--brand);
-  font-family: var(--font-head); font-size: 1.4rem; font-weight: 800;
-}
-.steps li h3 { font-size: clamp(1.5rem, 3.5vw, 2rem); margin-bottom: 10px; }
-.steps li p { font-size: clamp(1.1rem, 2.5vw, 1.35rem); margin: 0; color: var(--muted); }
+.steps li { display: none; counter-increment: step; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 28px; }
+.steps li.current { display: block; }
+.steps li::before { content: "Step " counter(step); display: block; margin-bottom: 8px; font-size: .9rem; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: .06em; }
+.steps li h3 { font-size: clamp(1.5rem, 3.5vw, 2rem); margin-bottom: 8px; }
+.steps li p { font-size: clamp(1.1rem, 2.4vw, 1.3rem); margin: 0; color: var(--muted); }
 .step-nav { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 16px 0 24px; }
-.step-label { color: var(--muted); font-weight: 600; font-size: .9rem; }
+.step-label { color: var(--muted); font-weight: 600; font-size: .95rem; }
 
 /* ===== Learn ===== */
-.tabs { display: inline-flex; gap: 4px; padding: 4px; background: var(--surface-2); border-radius: 14px; }
-.tab { border: none; background: transparent; padding: 9px 20px; border-radius: 10px; font-weight: 600; color: var(--muted); }
-.tab.active { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
-.tab-panel { display: none; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-top: 18px; }
-.tab-panel.active { display: grid; animation: fade .25s ease; }
-.fact { display: flex; gap: 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px; }
-.fact-icon { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; background: var(--brand-soft); color: var(--brand); flex-shrink: 0; }
-.fact h4 { font-size: .95rem; margin-bottom: 4px; }
-.fact p { margin: 0; color: var(--muted); font-size: .92rem; }
+.tabs { display: inline-flex; gap: 4px; padding: 4px; background: var(--surface-2); border-radius: var(--radius-sm); }
+.tab { border: 0; background: transparent; padding: 8px 20px; border-radius: 6px; font-weight: 600; color: var(--muted); }
+.tab.active { background: var(--surface); color: var(--primary); box-shadow: var(--shadow); }
+.tab-panel { display: none; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 20px; }
+.tab-panel.active { display: grid; }
+.fact { background: var(--surface); border: 1px solid var(--border); border-top: 3px solid var(--primary); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px 18px; }
+.fact h4 { font-size: .95rem; color: var(--primary); margin-bottom: 4px; }
+.fact p { margin: 0; }
 
-.quiz-card { margin-top: 32px; }
-.quiz-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
-.quiz-head h2 { font-size: 1.3rem; }
-.quiz-result { margin: 0; font-weight: 700; color: var(--brand); }
+.quiz-card { margin-top: 40px; }
+.quiz-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 4px; }
+.quiz-head h2 { font-size: 1.4rem; }
+.quiz-result { margin: 0; font-weight: 700; color: var(--primary); }
 .quiz-q { padding: 16px 0; border-bottom: 1px solid var(--border); }
 .quiz-q strong { display: block; margin-bottom: 10px; }
-.quiz-q label { display: flex; align-items: center; gap: 10px; padding: 10px 14px; margin: 6px 0; border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; transition: border-color .15s, background .15s; }
-.quiz-q label:hover { border-color: var(--brand); }
-.quiz-q label:has(input:checked) { border-color: var(--brand); background: var(--brand-soft); }
-.quiz-q input { accent-color: var(--brand); }
+.quiz-q label { display: flex; align-items: center; gap: 10px; padding: 10px 14px; margin: 6px 0; border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; }
+.quiz-q label:hover { border-color: var(--primary); }
+.quiz-q label:has(input:checked) { border-color: var(--primary); background: var(--primary-soft); }
+.quiz-q input { accent-color: var(--primary); }
 .quiz-q.right label:has(input:checked) { border-color: var(--green); background: var(--green-soft); }
-.quiz-q.wrong label:has(input:checked) { border-color: var(--brand); background: var(--brand-soft); }
-.quiz-q.right strong::after { content: "  ✓"; color: var(--green); }
-.quiz-q.wrong strong::after { content: "  ✗"; color: var(--brand); }
+.quiz-q.wrong label:has(input:checked) { border-color: var(--danger); background: var(--danger-soft); }
+.quiz-q.right strong::after { content: "  ✓ Correct"; color: var(--green); font-size: .9rem; }
+.quiz-q.wrong strong::after { content: "  ✗ Not quite"; color: var(--danger); font-size: .9rem; }
 #quizSubmit { margin-top: 20px; }
 
 /* ===== Chat ===== */
 .chat-card { padding: 0; overflow: hidden; display: flex; flex-direction: column; max-width: 760px; }
-.chat-header { display: flex; align-items: center; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--border); }
-.chat-header small { display: block; color: var(--muted); font-size: .8rem; }
-.avatar { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; background: var(--brand); color: #fff; }
-.avatar .icon { fill: #fff; stroke: none; width: 18px; }
-.chat-log { height: 400px; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; background: var(--surface-2); }
-.msg { max-width: 78%; padding: 11px 15px; border-radius: 18px; line-height: 1.45; white-space: pre-wrap; animation: fade .2s ease; }
-.msg.user { align-self: flex-end; background: var(--brand); color: #fff; border-bottom-right-radius: 6px; }
-.msg.bot { align-self: flex-start; background: var(--surface); border: 1px solid var(--border); border-bottom-left-radius: 6px; }
+.chat-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid var(--border); }
+.chat-header small { color: var(--muted); font-size: .88rem; }
+.chat-log { height: 400px; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; background: var(--bg); }
+.msg { max-width: 78%; padding: 10px 14px; border-radius: var(--radius); white-space: pre-wrap; }
+.msg.user { align-self: flex-end; background: var(--primary); color: #fff; }
+.msg.bot { align-self: flex-start; background: var(--surface); border: 1px solid var(--border); }
 .msg.typing { color: var(--muted); font-style: italic; }
 .chips { display: flex; gap: 8px; flex-wrap: wrap; padding: 12px 20px 0; }
-.chip { border: 1px solid var(--border); background: var(--surface); border-radius: 999px; padding: 6px 12px; font-size: .85rem; color: var(--muted); }
-.chip:hover { border-color: var(--brand); color: var(--brand); }
+.chip { border: 1px solid var(--border); background: var(--surface); border-radius: 999px; padding: 5px 14px; font-size: .9rem; color: var(--primary); }
+.chip:hover { border-color: var(--primary); }
 .chat-form { display: flex; gap: 8px; padding: 12px 20px 20px; }
-.chat-form input { flex: 1; font: inherit; color: var(--text); padding: 12px 16px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface-2); outline: none; }
-.chat-form input:focus { border-color: var(--brand); }
-.chat-form button { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; border: none; background: var(--brand); color: #fff; }
+.chat-form input { flex: 1; font: inherit; color: var(--text); padding: 0 14px; height: 46px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface); outline: none; }
+.chat-form input:focus { border-color: var(--primary); }
+.chat-form button { display: grid; place-items: center; width: 46px; height: 46px; border-radius: var(--radius-sm); border: 0; background: var(--primary); color: #fff; }
 
 /* ===== Coach ===== */
-.coach-grid { display: grid; grid-template-columns: 1.6fr 1fr; gap: 20px; align-items: start; }
-.coach-main { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
-.coach-box { position: relative; background: #0b0f19; border-radius: var(--radius); aspect-ratio: 16 / 9; overflow: hidden; box-shadow: var(--shadow); }
+.coach-grid { display: grid; grid-template-columns: 2.1fr 1fr; gap: 20px; align-items: start; }
+.coach-main { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.coach-box { position: relative; background: #0e1720; border: 1px solid var(--border); border-radius: var(--radius); aspect-ratio: 16 / 9; overflow: hidden; }
 .coach-box canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
 .coach-box video { display: none; }
-.coach-placeholder { position: absolute; inset: 0; display: flex; flex-direction: column; gap: 10px; align-items: center; justify-content: center; color: #64748b; }
-.coach-placeholder .icon { width: 48px; height: 48px; }
+
+/* Live readout on top of the video, readable from a couple of metres away */
+.coach-hud { position: absolute; top: 14px; left: 14px; display: flex; align-items: center; gap: 12px; padding: 8px 16px 8px 14px; border-radius: var(--radius-sm); background: rgba(14, 23, 32, .8); color: #fff; }
+.coach-rate-num { font-size: clamp(2.2rem, 4.5vw, 3.2rem); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.coach-rate-lbl { font-size: .8rem; line-height: 1.3; color: #c3d0db; }
+.coach-hud .is-good { color: #6ee7b7; }
+.coach-hud .is-warn { color: #fcd34d; }
+
+.coach-placeholder {
+  position: absolute; inset: 0; z-index: 2; padding: 20px;
+  display: flex; flex-direction: column; gap: 6px; align-items: center; justify-content: center; text-align: center;
+  background: #0e1720; color: #9fb1c1;
+}
+.coach-placeholder .icon { width: 44px; height: 44px; stroke-width: 1.5; color: #6bb2ea; margin-bottom: 4px; }
+.coach-placeholder strong { color: #fff; font-size: clamp(1.3rem, 2.6vw, 1.7rem); }
+.coach-big-start { margin-top: 14px; min-height: 52px; padding: 0 28px; font-size: 1.1rem; background: #0a6ebd; }
+.coach-msg { min-height: 1.3em; margin: 8px 0 0; font-size: .95rem; color: #c3d0db; }
+.coach-msg.bad { color: #ff9b9b; }
+
 .coach-cue {
-  position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); max-width: 92%;
-  padding: 10px 20px; border-radius: 999px;
-  background: rgba(11, 15, 25, .82); border: 1px solid rgba(255, 255, 255, .16); color: #fff;
-  font-family: var(--font-head); font-size: clamp(1rem, 2.4vw, 1.4rem); font-weight: 800; text-align: center;
+  position: absolute; left: 50%; bottom: 18px; z-index: 3; transform: translateX(-50%); max-width: 92%;
+  padding: 12px 26px; border-radius: 999px; background: rgba(14, 23, 32, .88); color: #fff;
+  font-size: clamp(1.3rem, 3vw, 2rem); font-weight: 700; text-align: center;
   opacity: 0; transition: opacity .25s; pointer-events: none;
 }
 .coach-cue.show { opacity: 1; }
-.coach-cue.good { color: #4ade80; }
-.coach-cue.warn { color: #fbbf24; }
+.coach-cue.good { color: #6ee7b7; }
+.coach-cue.warn { color: #fcd34d; }
 
-.coach-rate { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 4px 0 16px; }
-.coach-rate-num { font-family: var(--font-head); font-size: 4.5rem; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
-.coach-rate-lbl { font-size: .75rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-top: 6px; }
 .is-good { color: var(--green); }
-.is-warn { color: var(--amber-text); }
-.metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 18px; }
-.metric { display: flex; flex-direction: column; min-width: 0; padding: 8px 12px; border: 1px solid var(--border); border-left: 4px solid var(--border); border-radius: var(--radius-sm); background: var(--surface-2); }
-.metric .k { font-size: .72rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
-.metric .v { font-family: var(--font-head); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.metric.good { border-left-color: var(--green); }
-.metric.warn { border-left-color: var(--amber); }
-.metric.bad { border-left-color: var(--brand); }
-.coach-msg { min-height: 1.3em; margin: 8px 0 0; font-size: .88rem; color: var(--muted); }
-.coach-msg.bad { color: var(--brand); }
-.coach-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0 22px; }
-.coach-controls .btn { padding: 9px 12px; font-size: .9rem; }
-.coach-controls .btn[aria-pressed="true"] { background: var(--green-soft); color: var(--green); }
+.is-warn { color: var(--amber); }
+.metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.metric {
+  display: flex; flex-direction: column; min-width: 0; padding: 14px 16px;
+  background: var(--surface); border: 1px solid var(--border); border-top: 4px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow);
+  transition: background .2s, border-color .2s;
+}
+.metric .k { font-size: .9rem; font-weight: 600; color: var(--muted); }
+.metric .v { margin: 2px 0; font-size: 1.3rem; font-weight: 700; line-height: 1.25; }
+.metric .t { font-size: .82rem; color: var(--muted); }
+.metric.good { border-top-color: var(--green); background: var(--green-soft); }
+.metric.good .v { color: var(--green); }
+.metric.warn { border-top-color: var(--amber); background: var(--amber-soft); }
+.metric.warn .v { color: var(--amber); }
+.metric.bad { border-top-color: var(--danger); background: var(--danger-soft); }
+.metric.bad .v { color: var(--danger); }
+
 .coach-side h3 { margin-bottom: 8px; }
-.coach-steps { margin: 0; padding-left: 20px; color: var(--muted); font-size: .92rem; }
-.coach-steps li { padding: 3px 0; }
-.coach-debug { display: none; background: #0b0f19; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px; }
+.coach-steps { margin: 0 0 18px; padding-left: 20px; color: var(--muted); }
+.coach-steps li { padding: 2px 0; }
+.coach-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0 22px; }
+.coach-controls .btn { min-height: 40px; font-size: .95rem; }
+.coach-controls .btn[aria-pressed="true"] { background: var(--primary-soft); border-color: var(--primary); color: var(--primary); }
+.coach-checks { list-style: none; margin: 0; padding: 0; color: var(--muted); font-size: .95rem; }
+.coach-checks li { padding: 6px 0; border-top: 1px solid var(--border); }
+.coach-checks strong { color: var(--text); }
+.coach-debug { display: none; background: #0e1720; border-radius: var(--radius-sm); padding: 10px; }
 .coach-debug.show { display: block; }
 #coachGraph { width: 100%; height: 90px; display: block; }
-.coach-dbg-text { font: 12px/1.4 ui-monospace, Menlo, Consolas, monospace; color: #94a3b8; margin-top: 6px; white-space: pre-wrap; }
+.coach-dbg-text { font: 12px/1.4 ui-monospace, Menlo, Consolas, monospace; color: #9aabb9; margin-top: 6px; white-space: pre-wrap; }
 
-footer { display: flex; align-items: center; justify-content: center; text-align: center; color: var(--muted); font-size: .85rem; padding: 24px 16px 32px; border-top: 1px solid var(--border); }
+footer {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  max-width: 1080px; margin: 0 auto; padding: 24px 32px 40px; border-top: 1px solid var(--border);
+  color: var(--muted); font-size: .9rem;
+}
+footer .brand { font-size: 1rem; }
 
-/* ===== Tablet ===== */
+/* ===== Tablet / phone ===== */
 @media (max-width: 900px) {
   .home-grid, .coach-grid { grid-template-columns: 1fr; }
+  .tab-panel { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 640px) {
+  .topbar { flex-wrap: wrap; height: auto; padding: 10px 16px 0; gap: 0 12px; }
+  .nav-emergency { margin-left: auto; }
+  .nav { order: 3; width: 100%; margin: 6px 0 0; padding-bottom: 8px; }
+  main { padding: 28px 16px 48px; }
+  footer { padding: 20px 16px 32px; }
+  .tool-list, .tab-panel, .stats { grid-template-columns: 1fr; }
+  .metrics { grid-template-columns: 1fr 1fr; }
+  .coach-placeholder span { display: none; }
+  .call-911 { padding: 20px; }
 }
 </style>
 </head>
 <body>
-  <!-- Icon set (Lucide-style). Use with <svg class="icon" width="20" height="20"><use href="#i-heart"/></svg> -->
+  <!-- Icon set (Lucide-style). Use with <svg class="icon" width="20" height="20"><use href="#i-pulse"/></svg> -->
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
     <defs>
-      <symbol fill="currentColor" stroke="none" id="i-heart" viewBox="0 0 24 24"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></symbol>
       <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="i-pulse" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></symbol>
       <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="i-phone" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></symbol>
-      <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="i-alert" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4M12 17h.01"/></symbol>
-      <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="i-book" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></symbol>
-      <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="i-chat" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
       <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="i-camera" viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></symbol>
-      <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="i-timer" viewBox="0 0 24 24"><path d="M10 2h4M12 14l3-3"/><circle cx="12" cy="14" r="8"/></symbol>
-      <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="i-repeat" viewBox="0 0 24 24"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></symbol>
-      <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="i-hand" viewBox="0 0 24 24"><path d="M18 11V6a2 2 0 0 0-4 0v0M14 10V4a2 2 0 0 0-4 0v2M10 10.5V6a2 2 0 0 0-4 0v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></symbol>
-      <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="i-ruler" viewBox="0 0 24 24"><path d="M12 3v18M8 7l4-4 4 4M8 17l4 4 4-4"/></symbol>
-      <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="i-wind" viewBox="0 0 24 24"><path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2M9.6 4.6A2 2 0 1 1 11 8H2M12.6 19.4A2 2 0 1 0 14 16H2"/></symbol>
       <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></symbol>
-      <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="i-send" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></symbol>
-      <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="i-bolt" viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></symbol>
+      <symbol fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="i-send" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></symbol>
     </defs>
   </svg>
 
   <header class="topbar">
-    <a class="brand" href="#home">
-      <span class="brand-mark"><svg class="icon" width="20" height="20"><use href="#i-heart"/></svg></span>
-      CPR Coach
+    <a class="brand" href="#coach">
+      <span class="brand-mark"><svg class="icon" width="20" height="20"><use href="#i-pulse"/></svg></span>
+      <span>CPR Coach</span>
     </a>
     <nav class="nav">
-      <a href="#home"><svg class="icon" width="20" height="20"><use href="#i-pulse"/></svg><span>Start CPR</span></a>
-      <a href="#learn"><svg class="icon" width="20" height="20"><use href="#i-book"/></svg><span>Learn</span></a>
-      <a href="#assistant"><svg class="icon" width="20" height="20"><use href="#i-chat"/></svg><span>Ask</span></a>
-      <a href="#coach"><svg class="icon" width="20" height="20"><use href="#i-camera"/></svg><span>Coach</span></a>
-      <a href="#emergency" class="nav-emergency"><svg class="icon" width="20" height="20"><use href="#i-alert"/></svg><span>Emergency</span></a>
+      <a href="#coach">AI form coach</a>
+      <a href="#metronome">Metronome</a>
+      <a href="#learn">Learn</a>
+      <a href="#assistant">Ask</a>
     </nav>
+    <a href="#emergency" class="nav-emergency"><svg class="icon" width="20" height="20"><use href="#i-phone"/></svg>Emergency</a>
   </header>
 
   <div class="disclaimer">
-    <svg class="icon" width="20" height="20"><use href="#i-alert"/></svg>
-    <span>Learning aid only. Not a replacement for certified CPR training. In an emergency, <a href="tel:911">call 911</a>.</span>
+    <span class="dot"></span>
+    <span>Learning aid only — not a replacement for certified CPR training. In an emergency, <a href="tel:911">call 911</a>.</span>
   </div>
 
   <main>
-    <!-- HOME: compression metronome -->
-    <section id="home" class="page">
+    <!-- METRONOME -->
+    <section id="metronome" class="page">
       <div class="page-head">
         <span class="eyebrow">Hands-only CPR</span>
-        <h1>Push hard and fast,<br>right to the beat.</h1>
-        <p class="lead">Center of the chest, at least 2 inches deep. Let the chest come all the way back up.</p>
+        <h1>Push hard and fast, right to the beat</h1>
+        <p class="lead">Center of the chest, at least 2 inches deep. Let the chest come all the way back up between pushes.</p>
       </div>
 
       <div class="home-grid">
         <div class="card metronome-card">
-          <div class="pulse-wrap">
-            <div class="ring"></div>
-            <div id="pulse" class="pulse">
-              <span id="compCount" class="pulse-count">0</span>
-              <span class="pulse-sub">of 30</span>
-            </div>
+          <div class="panel-bar"><span>Compressions</span><span>Cycle 30:2</span></div>
+          <div id="pulse" class="pulse">
+            <span id="compCount" class="pulse-count">0</span>
+            <span class="pulse-sub">/ 30</span>
           </div>
           <div id="phase" class="phase">Ready when you are</div>
           <button id="cprToggle" class="big-btn start">Start CPR</button>
@@ -400,14 +411,8 @@ footer { display: flex; align-items: center; justify-content: center; text-align
 
         <div class="side-col">
           <div class="stats">
-            <div class="stat">
-              <span class="stat-icon"><svg class="icon" width="20" height="20"><use href="#i-repeat"/></svg></span>
-              <div><span class="label">Cycles (30:2)</span><span id="cycleCount" class="value">0</span></div>
-            </div>
-            <div class="stat">
-              <span class="stat-icon"><svg class="icon" width="20" height="20"><use href="#i-timer"/></svg></span>
-              <div><span class="label">Swap rescuer in</span><span id="swapTimer" class="value">2:00</span></div>
-            </div>
+            <div class="stat"><span class="label">Cycles done</span><span id="cycleCount" class="value">0</span></div>
+            <div class="stat"><span class="label">Swap rescuer in</span><span id="swapTimer" class="value">2:00</span></div>
           </div>
 
           <div class="card controls">
@@ -422,37 +427,13 @@ footer { display: flex; align-items: center; justify-content: center; text-align
           </div>
         </div>
       </div>
-
-      <h2 class="section-title">More tools</h2>
-      <div class="tool-grid">
-        <a class="tool-card danger" href="#emergency">
-          <span class="tool-icon"><svg class="icon" width="20" height="20"><use href="#i-alert"/></svg></span>
-          <h3>Emergency mode</h3><p>Call 911, then follow big step-by-step instructions.</p>
-          <span class="tool-go"><svg class="icon" width="20" height="20"><use href="#i-arrow"/></svg></span>
-        </a>
-        <a class="tool-card" href="#learn">
-          <span class="tool-icon"><svg class="icon" width="20" height="20"><use href="#i-book"/></svg></span>
-          <h3>Learn CPR</h3><p>Adult, child and infant basics, plus a quick quiz.</p>
-          <span class="tool-go"><svg class="icon" width="20" height="20"><use href="#i-arrow"/></svg></span>
-        </a>
-        <a class="tool-card" href="#assistant">
-          <span class="tool-icon"><svg class="icon" width="20" height="20"><use href="#i-chat"/></svg></span>
-          <h3>Ask the assistant</h3><p>Questions about CPR and AEDs, answered from trusted sources.</p>
-          <span class="tool-go"><svg class="icon" width="20" height="20"><use href="#i-arrow"/></svg></span>
-        </a>
-        <a class="tool-card" href="#coach">
-          <span class="tool-icon"><svg class="icon" width="20" height="20"><use href="#i-camera"/></svg></span>
-          <h3>Camera coach</h3><p>Webcam tracks your compression rate, chest recoil and elbow lock.</p>
-          <span class="tool-go"><svg class="icon" width="20" height="20"><use href="#i-arrow"/></svg></span>
-        </a>
-      </div>
     </section>
 
     <!-- EMERGENCY -->
     <section id="emergency" class="page">
       <a class="call-911" href="tel:911">
-        <span class="call-icon"><svg class="icon" width="20" height="20"><use href="#i-phone"/></svg></span>
         <span><strong>Call 911 first</strong><small>Put the phone on speaker. Send someone for an AED.</small></span>
+        <span class="call-icon"><svg class="icon" width="20" height="20"><use href="#i-phone"/></svg></span>
       </a>
 
       <div class="step-progress"><div id="stepBar" class="step-bar"></div></div>
@@ -469,7 +450,7 @@ footer { display: flex; align-items: center; justify-content: center; text-align
         <span id="stepLabel" class="step-label"></span>
         <button id="stepNext" class="btn primary">Next step</button>
       </div>
-      <a href="#home" class="btn outline wide"><svg class="icon" width="20" height="20"><use href="#i-pulse"/></svg> Open the compression metronome</a>
+      <a href="#metronome" class="btn outline wide"><svg class="icon" width="20" height="20"><use href="#i-pulse"/></svg> Open the compression metronome</a>
     </section>
 
     <!-- LEARN -->
@@ -487,22 +468,22 @@ footer { display: flex; align-items: center; justify-content: center; text-align
       </div>
 
       <div class="tab-panel active" id="tab-adult">
-        <div class="fact"><span class="fact-icon"><svg class="icon" width="20" height="20"><use href="#i-hand"/></svg></span><div><h4>Hands</h4><p>Two hands, center of the chest (lower half of the breastbone).</p></div></div>
-        <div class="fact"><span class="fact-icon"><svg class="icon" width="20" height="20"><use href="#i-ruler"/></svg></span><div><h4>Depth</h4><p>At least 2 in (5 cm), no more than 2.4 in.</p></div></div>
-        <div class="fact"><span class="fact-icon"><svg class="icon" width="20" height="20"><use href="#i-pulse"/></svg></span><div><h4>Rate</h4><p>100 to 120 compressions per minute.</p></div></div>
-        <div class="fact"><span class="fact-icon"><svg class="icon" width="20" height="20"><use href="#i-wind"/></svg></span><div><h4>Breaths</h4><p>30 compressions to 2 breaths, or hands-only if untrained.</p></div></div>
+        <div class="fact"><h4>Hands</h4><p>Two hands, center of the chest (lower half of the breastbone).</p></div>
+        <div class="fact"><h4>Depth</h4><p>At least 2 in (5 cm), no more than 2.4 in.</p></div>
+        <div class="fact"><h4>Rate</h4><p>100 to 120 compressions per minute.</p></div>
+        <div class="fact"><h4>Breaths</h4><p>30 compressions to 2 breaths, or hands-only if untrained.</p></div>
       </div>
       <div class="tab-panel" id="tab-child">
-        <div class="fact"><span class="fact-icon"><svg class="icon" width="20" height="20"><use href="#i-hand"/></svg></span><div><h4>Hands</h4><p>One or two hands, center of the chest. Age 1 to puberty.</p></div></div>
-        <div class="fact"><span class="fact-icon"><svg class="icon" width="20" height="20"><use href="#i-ruler"/></svg></span><div><h4>Depth</h4><p>About 2 in (5 cm), one third of the chest.</p></div></div>
-        <div class="fact"><span class="fact-icon"><svg class="icon" width="20" height="20"><use href="#i-pulse"/></svg></span><div><h4>Rate</h4><p>100 to 120 compressions per minute.</p></div></div>
-        <div class="fact"><span class="fact-icon"><svg class="icon" width="20" height="20"><use href="#i-wind"/></svg></span><div><h4>Breaths</h4><p>30:2 with one rescuer, 15:2 with two.</p></div></div>
+        <div class="fact"><h4>Hands</h4><p>One or two hands, center of the chest. Age 1 to puberty.</p></div>
+        <div class="fact"><h4>Depth</h4><p>About 2 in (5 cm), one third of the chest.</p></div>
+        <div class="fact"><h4>Rate</h4><p>100 to 120 compressions per minute.</p></div>
+        <div class="fact"><h4>Breaths</h4><p>30:2 with one rescuer, 15:2 with two.</p></div>
       </div>
       <div class="tab-panel" id="tab-infant">
-        <div class="fact"><span class="fact-icon"><svg class="icon" width="20" height="20"><use href="#i-hand"/></svg></span><div><h4>Hands</h4><p>Two fingers, or two thumbs encircling, just below the nipple line. Under age 1.</p></div></div>
-        <div class="fact"><span class="fact-icon"><svg class="icon" width="20" height="20"><use href="#i-ruler"/></svg></span><div><h4>Depth</h4><p>About 1.5 in (4 cm), one third of the chest.</p></div></div>
-        <div class="fact"><span class="fact-icon"><svg class="icon" width="20" height="20"><use href="#i-pulse"/></svg></span><div><h4>Rate</h4><p>100 to 120 compressions per minute.</p></div></div>
-        <div class="fact"><span class="fact-icon"><svg class="icon" width="20" height="20"><use href="#i-wind"/></svg></span><div><h4>Breaths</h4><p>30:2 with one rescuer, 15:2 with two.</p></div></div>
+        <div class="fact"><h4>Hands</h4><p>Two fingers, or two thumbs encircling, just below the nipple line. Under age 1.</p></div>
+        <div class="fact"><h4>Depth</h4><p>About 1.5 in (4 cm), one third of the chest.</p></div>
+        <div class="fact"><h4>Rate</h4><p>100 to 120 compressions per minute.</p></div>
+        <div class="fact"><h4>Breaths</h4><p>30:2 with one rescuer, 15:2 with two.</p></div>
       </div>
       <p class="note">Placeholder summary. Check against current AHA / Red Cross guidelines before the demo.</p>
 
@@ -525,8 +506,8 @@ footer { display: flex; align-items: center; justify-content: center; text-align
       </div>
       <div class="card chat-card">
         <div class="chat-header">
-          <span class="avatar"><svg class="icon" width="20" height="20"><use href="#i-heart"/></svg></span>
-          <div><strong>CPR Assistant</strong><small>Answers from a CPR knowledge base</small></div>
+          <strong>CPR Assistant</strong>
+          <small>Answers from a CPR knowledge base</small>
         </div>
         <div id="chatLog" class="chat-log">
           <div class="msg bot">Hi! Ask me anything about CPR, AEDs, or this site.</div>
@@ -543,24 +524,40 @@ footer { display: flex; align-items: center; justify-content: center; text-align
       </div>
     </section>
 
-    <!-- CAMERA COACH -->
+    <!-- AI FORM COACH (main page) -->
     <section id="coach" class="page">
       <div class="page-head">
-        <span class="eyebrow">Camera coach</span>
-        <h1>Camera compression coach</h1>
-        <p class="lead">Your webcam tracks compression rate, chest recoil and elbow lock, and calls out fixes as you go.</p>
+        <span class="eyebrow">AI form coach</span>
+        <h1>Real-time feedback on your CPR form</h1>
+        <p class="lead">Do compressions on a manikin or pillow in front of your camera. AI pose tracking watches your arms and tells you, out loud, how to fix your form.</p>
       </div>
+
       <div class="coach-grid">
         <div class="coach-main">
           <div class="coach-box">
             <canvas id="coachView"></canvas>
             <video id="coachVideo" playsinline muted></video>
+            <div class="coach-hud">
+              <span id="coachRateNum" class="coach-rate-num">--</span>
+              <span class="coach-rate-lbl">compressions / min<br>target 100–120</span>
+            </div>
             <div id="coachPlaceholder" class="coach-placeholder">
               <svg class="icon" width="20" height="20"><use href="#i-camera"/></svg>
-              <span>Camera is off</span>
+              <strong>See your form, live</strong>
+              <span>Video is analyzed on your device and never uploaded.</span>
+              <button id="coachPlaceholderStart" class="btn primary coach-big-start">Start AI coach</button>
+              <p id="coachMsg" class="coach-msg"></p>
             </div>
             <div id="coachCue" class="coach-cue"></div>
           </div>
+
+          <div class="metrics">
+            <div class="metric" id="mRate"><span class="k">Rate</span><span class="v">Waiting</span><span class="t">100–120 per minute</span></div>
+            <div class="metric" id="mRecoil"><span class="k">Chest recoil</span><span class="v">--</span><span class="t">Let the chest fully rise</span></div>
+            <div class="metric" id="mElbow"><span class="k">Elbows</span><span class="v">--</span><span class="t">Keep arms locked straight</span></div>
+            <div class="metric" id="mCount"><span class="k">Compressions</span><span class="v">0</span><span class="t">This session</span></div>
+          </div>
+
           <div id="coachDebug" class="coach-debug">
             <canvas id="coachGraph"></canvas>
             <div id="coachDbgText" class="coach-dbg-text"></div>
@@ -568,19 +565,14 @@ footer { display: flex; align-items: center; justify-content: center; text-align
         </div>
 
         <div class="card coach-side">
-          <div class="coach-rate">
-            <span id="coachRateNum" class="coach-rate-num">--</span>
-            <span class="coach-rate-lbl">per min · target 100–120</span>
-          </div>
-          <div class="metrics">
-            <div class="metric" id="mRate"><span class="k">Rate</span><span class="v">Waiting</span></div>
-            <div class="metric" id="mCount"><span class="k">Compressions</span><span class="v">0</span></div>
-            <div class="metric" id="mRecoil"><span class="k">Recoil</span><span class="v">--</span></div>
-            <div class="metric" id="mElbow"><span class="k">Elbows</span><span class="v">--</span></div>
-          </div>
+          <h3>How to set up</h3>
+          <ol class="coach-steps">
+            <li>Set the camera side-on, about 1.5–2 m (5–6 ft) away.</li>
+            <li>Keep your shoulders, elbows and hands in view.</li>
+            <li>Turn the volume up, then start compressions on a manikin or pillow, never a person.</li>
+          </ol>
 
-          <button id="coachStart" class="btn primary wide">Start camera</button>
-          <p id="coachMsg" class="coach-msg"></p>
+          <button id="coachStart" class="btn primary wide">Start AI coach</button>
           <div class="coach-controls">
             <button id="coachFlip" class="btn ghost">Flip camera</button>
             <button id="coachVoice" class="btn ghost" aria-pressed="true">Voice on</button>
@@ -588,20 +580,40 @@ footer { display: flex; align-items: center; justify-content: center; text-align
             <button id="coachDebugBtn" class="btn ghost" aria-pressed="false">Debug</button>
           </div>
 
-          <h3>How to set up</h3>
-          <ol class="coach-steps">
-            <li>Set the camera side-on, about 1.5–2 m (5–6 ft) away.</li>
-            <li>Keep your shoulders, elbows and hands in view.</li>
-            <li>Turn the volume up, then start compressions on a manikin or pillow, never a person.</li>
-          </ol>
+          <h3>What the AI checks</h3>
+          <ul class="coach-checks">
+            <li><strong>Rate</strong> — counts each push from your wrist movement.</li>
+            <li><strong>Recoil</strong> — checks your hands come all the way back up.</li>
+            <li><strong>Elbows</strong> — measures the angle of your arms.</li>
+          </ul>
         </div>
       </div>
+
+      <h2 class="section-title">More tools</h2>
+      <ol class="tool-list">
+        <li><a class="danger" href="#emergency">
+          <span class="tool-num">01</span><h3>Emergency mode</h3><p>Call 911, then follow big step-by-step instructions.</p>
+          <svg class="icon" width="20" height="20"><use href="#i-arrow"/></svg>
+        </a></li>
+        <li><a href="#metronome">
+          <span class="tool-num">02</span><h3>Compression metronome</h3><p>A beat at 100–120 per minute with a 30:2 counter.</p>
+          <svg class="icon" width="20" height="20"><use href="#i-arrow"/></svg>
+        </a></li>
+        <li><a href="#learn">
+          <span class="tool-num">03</span><h3>Learn CPR</h3><p>Adult, child and infant basics, plus a quick quiz.</p>
+          <svg class="icon" width="20" height="20"><use href="#i-arrow"/></svg>
+        </a></li>
+        <li><a href="#assistant">
+          <span class="tool-num">04</span><h3>Ask the assistant</h3><p>Questions about CPR and AEDs, answered from trusted sources.</p>
+          <svg class="icon" width="20" height="20"><use href="#i-arrow"/></svg>
+        </a></li>
+      </ol>
     </section>
   </main>
 
   <footer>
-    <span class="brand-mark sm"><svg class="icon" width="20" height="20"><use href="#i-heart"/></svg></span>
-    Hackathon prototype. Not medical advice and not a substitute for certified CPR training.
+    <a class="brand" href="#coach"><span class="brand-mark sm"><svg class="icon" width="20" height="20"><use href="#i-pulse"/></svg></span>CPR Coach</a>
+    <span>Hackathon prototype. Not medical advice and not a substitute for certified CPR training.</span>
   </footer>
 
   <script>
@@ -859,7 +871,7 @@ window.CPR_CONFIG = {
     const m = message.toLowerCase();
     if (/\b(911|emergency|collapse|not breathing)\b/.test(m)) return "If this is a real emergency, call 911 now and open the Emergency tab.";
     if (/deep|depth/.test(m)) return "For adults, push at least 2 inches (5 cm) deep and let the chest fully come back up. (Placeholder answer.)";
-    if (/fast|rate|bpm|speed/.test(m)) return "Aim for 100 to 120 compressions per minute. The metronome on the home page runs at 110. (Placeholder answer.)";
+    if (/fast|rate|bpm|speed/.test(m)) return "Aim for 100 to 120 compressions per minute. The Metronome tab runs at 110. (Placeholder answer.)";
     if (/aed|defib/.test(m)) return "Turn the AED on and follow its voice prompts. Ask people nearby to find one. (Placeholder answer.)";
     return "I'm a placeholder for now. Once the RAG assistant is connected (see config.js), I'll answer from our CPR knowledge base.";
   }
@@ -1336,7 +1348,7 @@ window.CPR_CONFIG = {
       try { wakeLock = await navigator.wakeLock?.request('screen'); } catch {}
       $('coachPlaceholder').style.display = 'none';
       msg.textContent = '';
-      btn.textContent = 'Stop camera';
+      btn.textContent = 'Stop coach';
       running = true;
       requestAnimationFrame(frame);
     } catch (e) {
@@ -1365,7 +1377,7 @@ window.CPR_CONFIG = {
     clearTimeout(cueTimer);
     $('coachCue').classList.remove('show');
     $('coachPlaceholder').style.display = 'flex';
-    $('coachStart').textContent = 'Start camera';
+    $('coachStart').textContent = 'Start AI coach';
   }
 
   /* ---------- buttons ---------- */
@@ -1374,6 +1386,7 @@ window.CPR_CONFIG = {
     graph = $('coachGraph'); gctx = graph.getContext('2d');
 
     $('coachStart').addEventListener('click', () => (running ? stop() : start()));
+    $('coachPlaceholderStart').addEventListener('click', () => $('coachStart').click());
 
     $('coachFlip').addEventListener('click', async () => {
       facing = facing === 'user' ? 'environment' : 'user';
@@ -1417,19 +1430,21 @@ window.CPR_CONFIG = {
 // Simple hash router: shows one <section class="page"> at a time.
 (function () {
   function show() {
-    const id = (location.hash || "#home").slice(1);
-    const page = document.getElementById(id) || document.getElementById("home");
+    const id = (location.hash || "#coach").slice(1);
+    const page = document.getElementById(id) || document.getElementById("coach");
     document.querySelectorAll(".page").forEach((p) => p.classList.toggle("active", p === page));
-    document.querySelectorAll("nav a").forEach((a) => a.classList.toggle("active", a.getAttribute("href") === "#" + page.id));
+    document.querySelectorAll(".nav a, .nav-emergency").forEach((a) => a.classList.toggle("active", a.getAttribute("href") === "#" + page.id));
     // Prefetch the pose model on the Coach page; release the camera when leaving it.
     if (window.CPR_COACH) {
       if (page.id === "coach") window.CPR_COACH.onShow();
       else window.CPR_COACH.onHide();
     }
     window.scrollTo(0, 0);
+    requestAnimationFrame(() => window.scrollTo(0, 0));
   }
   window.addEventListener("hashchange", show);
   window.addEventListener("DOMContentLoaded", show);
+  window.addEventListener("load", () => window.scrollTo(0, 0));
 })();
 </script>
 </body>
