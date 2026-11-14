@@ -1128,6 +1128,7 @@ window.CPR_CONFIG = {
   // CPR RAG agent (Cloudflare Worker + Workers AI). Leave empty ("") to use the offline placeholder replies.
   //   (the agent also serves a natural voice at the same address with /tts instead of /ask)
   chatUrl: "https://cpr-rag-agent.andrewozimek01.workers.dev/ask",
+  autoHandsFree: true,  // starting the AI coach also turns on hands-free listening
   wakeWord: true,       // hands-free only answers when you start with "Coach", e.g. "Coach, how deep?"
   naturalVoice: false,  // false = answers use the camera coach's British voice (instant); true = Deepgram AI voice from the agent
 
@@ -1513,21 +1514,39 @@ window.CPR_CONFIG = {
       return;
     }
     mic.addEventListener("click", () => {
-      if (handsFree.isOn()) { handsFree.stop(); return; }
-      handsFree.start({
-        onText: heardSpeech,
-        onInterim: (t) => {
-          if (busy || speaking || !(cfg.wakeWord === false || WAKE.test(t) || performance.now() < armedUntil)) return;
-          tipsQuietUntil = performance.now() + 4000;   // you're talking to the coach: hold the form tips
-          setStatus("Hearing: ", t);
-        },
-        onState: micState,
-      });
+      if (handsFree.isOn()) { autoStarted = false; handsFree.stop(); return; }
+      startHandsFree();
     });
   });
 
+  function startHandsFree() {
+    if (!handsFree.supported || handsFree.isOn()) return;
+    handsFree.start({
+      onText: heardSpeech,
+      onInterim: (t) => {
+        if (busy || speaking || !(cfg.wakeWord === false || WAKE.test(t) || performance.now() < armedUntil)) return;
+        tipsQuietUntil = performance.now() + 4000;   // you're talking to the coach: hold the form tips
+        setStatus("Hearing: ", t);
+      },
+      onState: micState,
+    });
+  }
+  // The AI coach turns hands-free on by itself when it starts, and off again when it stops
+  // (unless you had already switched it on yourself).
+  let autoStarted = false;
+  function autoHandsFree(on) {
+    if (on) {
+      if (cfg.autoHandsFree === false || !handsFree.supported || handsFree.isOn()) return;
+      autoStarted = true;
+      startHandsFree();
+    } else if (autoStarted) {
+      autoStarted = false;
+      handsFree.stop();
+    }
+  }
+
   window.CPR_AGENT = {
-    ask, speak, stopSpeaking, tapToTalk, handsFree, note,
+    ask, speak, stopSpeaking, tapToTalk, handsFree, note, autoHandsFree,
     isSpeaking: () => speaking,
     isBusy: () => busy || speaking || performance.now() < tipsQuietUntil,   // other voices stay quiet while this is true
     FALLBACK,
@@ -2565,6 +2584,7 @@ window.CPR_CONFIG = {
       $('coachFlip').disabled = source !== 'camera';
       running = true;
       startLoop();
+      if (window.CPR_AGENT && source === 'camera') window.CPR_AGENT.autoHandsFree(true);   // talk to the coach right away
       fitBox();
       // On phones, bring the camera view to the top so the live feedback fills the screen.
       if (matchMedia('(max-width: 640px)').matches) view.parentElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -2605,6 +2625,7 @@ window.CPR_CONFIG = {
     $('coachStart').textContent = 'Start AI coach';
     $('coachTime').textContent = '';
     exitFocus();
+    if (window.CPR_AGENT) window.CPR_AGENT.autoHandsFree(false);
   }
 
   /* ---------- full-screen coach mode ---------- */
