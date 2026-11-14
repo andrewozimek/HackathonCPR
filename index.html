@@ -299,11 +299,11 @@ input[type="range"] { width: 100%; accent-color: var(--primary); }
 
 .step-progress { height: 8px; background: var(--border); border-radius: 999px; margin: 32px 0 16px; overflow: hidden; }
 .step-bar { height: 100%; width: 0; background: var(--primary); border-radius: 999px; transition: width .3s; }
-.steps { list-style: none; padding: 0; margin: 0; counter-reset: step; }
-.steps li { display: none; counter-increment: step; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 32px; }
+.steps { list-style: none; padding: 0; margin: 0; }
+.steps li { display: none; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 32px; }
 .steps li.current { display: block; animation: rise .25s ease; }
 .steps li::before {
-  content: counter(step); display: grid; place-items: center; width: 44px; height: 44px; margin-bottom: 16px;
+  content: attr(data-n); display: grid; place-items: center; width: 44px; height: 44px; margin-bottom: 16px;
   border-radius: 50%; background: var(--primary-soft); color: var(--primary); font-size: 1.2rem; font-weight: 800;
 }
 .steps li h3 { font-size: clamp(1.6rem, 3.6vw, 2.2rem); font-weight: 800; margin-bottom: 8px; }
@@ -945,6 +945,33 @@ body.coach-focus .coach-box { margin: 0; border-radius: 16px; border-width: 1.5p
   .coach-timer .tm-num { font-size: 2rem; }
 }
 
+/* ===== Optional metronome beat control (setup card + coach view panel) ===== */
+.beat-ctl {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  margin-top: 14px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 14px;
+  background: var(--surface-2); font-size: .92rem; font-weight: 600;
+}
+.beat-ctl .switch { flex-direction: row; justify-content: flex-start; gap: 10px; }
+.tempo { display: flex; align-items: center; gap: 6px; font-variant-numeric: tabular-nums; }
+.tempo button {
+  display: grid; place-items: center; width: 36px; height: 36px; padding: 0; border-radius: 50%;
+  border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: 1.25rem; line-height: 1;
+}
+.tempo button:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
+.tempo button:disabled { opacity: .35; cursor: not-allowed; }
+.tempo-val { min-width: 2.2em; text-align: center; font-weight: 800; font-size: 1.05rem; }
+.tempo-unit { color: var(--muted); font-size: .8rem; margin-right: 2px; }
+.beat-ctl.off .tempo-val, .beat-ctl.off .tempo-unit { opacity: .55; }
+/* In the chat panel it only shows during the coach view */
+.agent-dock .beat-ctl { display: none; }
+body.coach-focus .agent-dock .beat-ctl { display: flex; flex-shrink: 0; margin: 0; padding: 6px 10px; }
+@media (max-width: 640px) {
+  body.coach-focus #coach { padding-bottom: calc(250px + env(safe-area-inset-bottom)); }
+  body.coach-focus .agent-dock { height: 238px; }
+  body.coach-focus .agent-dock .beat-ctl { flex-wrap: nowrap; font-size: .85rem; }
+  body.coach-focus .tempo button { width: 32px; height: 32px; }
+}
+
 /* ===== Phones & tablets: lighter effects so scrolling and animations stay smooth =====
    Blur behind a sticky bar, a glow filter on a moving line, and blur-in animations all have to be
    redrawn every frame. They look nearly the same without those on a small screen. */
@@ -1070,7 +1097,7 @@ body.coach-focus .coach-box { margin: 0; border-radius: 16px; border-width: 1.5p
         <span id="stepLabel" class="step-label"></span>
         <button id="stepNext" class="btn primary">Next step</button>
       </div>
-      <p class="note" style="margin:0 0 16px">Have a question while doing CPR? Use the assistant bar at the bottom. Tap <strong>Hands-free</strong> once and just ask out loud.</p>
+      <p class="note" style="margin:0 0 16px">Have a question while doing CPR? Tap the chat button in the bottom-right corner, then turn on <strong>Hands-free</strong> and just ask out loud.</p>
       <a href="#metronome" class="btn outline wide"><svg class="icon" width="20" height="20"><use href="#i-pulse"/></svg> Open the compression metronome</a>
     </section>
 
@@ -1189,6 +1216,14 @@ body.coach-focus .coach-box { margin: 0; border-radius: 16px; border-width: 1.5p
             <button id="coachReset" class="btn ghost">Reset</button>
             <button id="coachDebugBtn" class="btn ghost" aria-pressed="false">Debug</button>
           </div>
+          <div class="beat-ctl">
+              <label class="switch"><input type="checkbox" class="beat-on"><span class="slider"></span> Metronome beat</label>
+              <div class="tempo" role="group" aria-label="Beat tempo">
+                <button type="button" class="tempo-down" aria-label="Slower">&minus;</button>
+                <span class="tempo-val">110</span><span class="tempo-unit">bpm</span>
+                <button type="button" class="tempo-up" aria-label="Faster">+</button>
+              </div>
+            </div>
         </div>
       </div>
 
@@ -1212,6 +1247,14 @@ body.coach-focus .coach-box { margin: 0; border-radius: 16px; border-width: 1.5p
       <button id="focusStop" class="btn ghost" type="button">Stop</button>
       <button id="focusFull" class="btn ghost" type="button">Full screen</button>
       <button id="focusExit" class="btn ghost" type="button">Exit coach view</button>
+    </div>
+    <div class="beat-ctl" data-where="panel">
+      <label class="switch"><input type="checkbox" class="beat-on"><span class="slider"></span> Metronome beat</label>
+      <div class="tempo" role="group" aria-label="Beat tempo">
+        <button type="button" class="tempo-down" aria-label="Slower">&minus;</button>
+        <span class="tempo-val">110</span><span class="tempo-unit">bpm</span>
+        <button type="button" class="tempo-up" aria-label="Faster">+</button>
+      </div>
     </div>
     <div id="coachFeed" class="coach-feed" aria-live="polite"><p class="feed-empty">Hi! Ask me anything about CPR, AEDs or your form. Type below, or turn on Hands-free and say "Coach, ..."</p></div>
     <div class="dock-chips" aria-label="Suggested questions">
@@ -1890,6 +1933,8 @@ window.CPR_CONFIG = {
 
   function setupSteps() {
     const steps = [...document.querySelectorAll("#emergencySteps li")];
+    // Number each step for its circle (a CSS counter would skip the hidden steps and always show 1).
+    steps.forEach((s, j) => { s.dataset.n = j + 1; });
     let i = 0;
     const show = () => {
       steps.forEach((s, j) => s.classList.toggle("current", j === i));
@@ -1994,6 +2039,7 @@ window.CPR_CONFIG = {
     // Session
     SESSION_SECONDS: 60,      // live camera: the test runs this long after "Go", then shows the score. 0 = no limit.
     COUNTDOWN_SECONDS: 3,     // live camera: 3-2-1-Go before the test starts (time to get in position). 0 = no countdown.
+    BEAT_MIN: 100, BEAT_MAX: 120, BEAT_STEP: 5,   // optional metronome beat during the test (off unless the user turns it on)
 
     // Score weights (must not all be zero)
     SCORE: { rate: 0.35, recoil: 0.25, handsOn: 0.2, elbows: 0.1, arms: 0.1 },
@@ -2597,6 +2643,57 @@ window.CPR_CONFIG = {
     next();
   }
 
+  /* ---------- optional metronome beat during the test ---------- */
+  // Off unless the user turns it on. Clicks are scheduled on the audio clock a little ahead of time,
+  // so the beat stays steady even while the pose model keeps the page busy.
+  const beat = { on: false, bpm: 110, ctx: null, timer: 0, next: 0 };
+  const clampBpm = (v) => {
+    const n = Math.round((Number(v) || 110) / CONFIG.BEAT_STEP) * CONFIG.BEAT_STEP;
+    return Math.min(CONFIG.BEAT_MAX, Math.max(CONFIG.BEAT_MIN, n));
+  };
+  try {
+    const saved = JSON.parse(localStorage.getItem('coachBeat') || 'null');
+    if (saved) { beat.on = !!saved.on; beat.bpm = clampBpm(saved.bpm); }
+  } catch {}
+  function beatSave() { try { localStorage.setItem('coachBeat', JSON.stringify({ on: beat.on, bpm: beat.bpm })); } catch {} }
+  function beatUnlock() {                    // must run during a tap: phones only allow sound that starts from one
+    try {
+      if (navigator.audioSession) navigator.audioSession.type = 'playback';   // iPhone: play even in silent mode
+      beat.ctx = beat.ctx || new (window.AudioContext || window.webkitAudioContext)();
+      if (beat.ctx.state === 'suspended') beat.ctx.resume();
+    } catch {}
+  }
+  function beatClick(when) {
+    const c = beat.ctx, osc = c.createOscillator(), gain = c.createGain();
+    osc.frequency.value = 1000;
+    gain.gain.setValueAtTime(0.0001, when);
+    gain.gain.exponentialRampToValueAtTime(0.25, when + 0.003);
+    gain.gain.exponentialRampToValueAtTime(0.0001, when + 0.05);
+    osc.connect(gain).connect(c.destination);
+    osc.start(when); osc.stop(when + 0.06);
+  }
+  function beatStart() {
+    if (beat.timer || !beat.ctx) return;
+    beat.next = beat.ctx.currentTime + 0.05;
+    beat.timer = setInterval(() => {
+      const ahead = beat.ctx.currentTime + 0.12;
+      while (beat.next < ahead) { beatClick(beat.next); beat.next += 60 / beat.bpm; }
+    }, 25);
+  }
+  function beatStop() { clearInterval(beat.timer); beat.timer = 0; }
+  // Beat plays only while a test is actually running: after "Go", not during the countdown or the score card.
+  function beatSync() { (beat.on && running && goAt && !countingDown && !held) ? beatStart() : beatStop(); }
+  function beatRender() {
+    document.querySelectorAll('.beat-ctl').forEach((el) => {
+      el.querySelector('.beat-on').checked = beat.on;
+      el.querySelector('.tempo-val').textContent = beat.bpm;
+      el.classList.toggle('off', !beat.on);
+      el.querySelector('.tempo-down').disabled = beat.bpm <= CONFIG.BEAT_MIN;
+      el.querySelector('.tempo-up').disabled = beat.bpm >= CONFIG.BEAT_MAX;
+    });
+  }
+  function setBpm(v) { beat.bpm = clampBpm(v); beatSave(); beatRender(); }   // the running beat picks up the new tempo on its next click
+
   /* ---------- 3-2-1-Go countdown ---------- */
   // Before a live camera test: big 3, 2, 1, Go! over the camera (spoken too). Measuring and the timer start at Go.
   function popText(el, text) { el.textContent = text; el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); }
@@ -2604,6 +2701,7 @@ window.CPR_CONFIG = {
     const box = $('coachCountdown'), num = box.querySelector('.cd-num');
     const live = () => token === startToken && running;
     countingDown = true; goAt = 0;
+    beatStop();
     $('coachTimer').classList.remove('show');
     box.classList.add('show');
     for (let n = CONFIG.COUNTDOWN_SECONDS; n >= 1; n--) {
@@ -2615,6 +2713,7 @@ window.CPR_CONFIG = {
     popText(num, 'Go!'); speak('Go!');
     resetAll(); render(analyzer.status(0), true);
     countingDown = false; goAt = performance.now();
+    beatSync();                               // optional beat starts at "Go"
     setTimeout(() => { if (!countingDown) box.classList.remove('show'); }, 800);
     return true;
   }
@@ -2623,6 +2722,7 @@ window.CPR_CONFIG = {
   function showScore() {
     const s = analyzer.summary(Math.max(lastT, analyzer.lastBottomT ?? 0));
     held = true;
+    beatStop();
     if ('speechSynthesis' in window) speechSynthesis.cancel();
     clearTimeout(cueTimer);
     $('coachCue').classList.remove('show');
@@ -2686,6 +2786,7 @@ window.CPR_CONFIG = {
     const token = ++startToken;
     msg.className = 'coach-msg'; msg.textContent = 'Loading pose model…';
     btn.disabled = true;
+    if (beat.on) beatUnlock();               // during the tap, so the beat is allowed to play later
     try {
       if ('speechSynthesis' in window) {   // unlock speech on mobile (must happen during the tap; iPhone ignores an empty phrase)
         const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u);
@@ -2707,7 +2808,7 @@ window.CPR_CONFIG = {
       btn.disabled = false;                   // Stop works during the countdown
       if (source === 'camera' && CONFIG.COUNTDOWN_SECONDS > 0) {
         if (!(await countdown(token))) return;   // stopped during the countdown
-      } else goAt = performance.now();
+      } else { goAt = performance.now(); beatSync(); }
       if (window.CPR_AGENT && source === 'camera') window.CPR_AGENT.autoHandsFree(true);   // talk to the coach right away
     } catch (e) {
       console.error(e);
@@ -2746,6 +2847,7 @@ window.CPR_CONFIG = {
     $('coachStart').textContent = 'Start AI coach';
     $('coachTime').textContent = '';
     countingDown = false; goAt = 0;
+    beatStop();
     $('coachCountdown').classList.remove('show');
     $('coachTimer').classList.remove('show');
     exitFocus();
@@ -2801,6 +2903,18 @@ window.CPR_CONFIG = {
       }
     });
 
+    // Optional metronome beat: switch + tempo buttons (in the setup card and the coach view panel, kept in sync)
+    document.querySelectorAll('.beat-ctl').forEach((el) => {
+      el.querySelector('.beat-on').addEventListener('change', (e) => {
+        beat.on = e.target.checked;
+        if (beat.on) beatUnlock();
+        beatSave(); beatRender(); beatSync();
+      });
+      el.querySelector('.tempo-down').addEventListener('click', () => setBpm(beat.bpm - CONFIG.BEAT_STEP));
+      el.querySelector('.tempo-up').addEventListener('click', () => setBpm(beat.bpm + CONFIG.BEAT_STEP));
+    });
+    beatRender();
+
     $('coachVoice').addEventListener('click', (e) => {
       voiceOn = !voiceOn;
       e.currentTarget.setAttribute('aria-pressed', voiceOn);
@@ -2823,7 +2937,7 @@ window.CPR_CONFIG = {
     $('coachAgain').addEventListener('click', async () => {
       hideScore();
       if (source === 'camera' && running && CONFIG.COUNTDOWN_SECONDS > 0) { countdown(startToken); return; }   // 3-2-1 again
-      resetAll(); goAt = goAt ? performance.now() : 0;
+      resetAll(); goAt = goAt ? performance.now() : 0; beatSync();
       render(analyzer.status(0), true);
       if (source === 'file') { video.currentTime = 0; try { await video.play(); } catch (e) { console.error(e); } }
     });
