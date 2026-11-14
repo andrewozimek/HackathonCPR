@@ -1,0 +1,596 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>CPR Camera Coach</title>
+<style>
+  :root {
+    --bg: #0b0f14;
+    --panel: rgba(11, 15, 20, 0.78);
+    --line: rgba(255, 255, 255, 0.14);
+    --text: #f3f6f9;
+    --muted: #9aa7b4;
+    --good: #2fd27a;
+    --warn: #ffb020;
+    --bad: #ff5a5a;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; height: 100%; background: var(--bg); color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    overflow: hidden; -webkit-tap-highlight-color: transparent;
+  }
+  #stage { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: #000; }
+  #view { width: 100%; height: 100%; object-fit: contain; display: block; }
+  video { display: none; }
+
+  /* ---------- HUD ---------- */
+  #hud {
+    position: fixed; top: 0; left: 0; right: 0;
+    padding: calc(10px + env(safe-area-inset-top)) 12px 10px;
+    display: flex; gap: 10px; align-items: stretch;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.75), rgba(0,0,0,0));
+    pointer-events: none;
+  }
+  #rateBox {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+    padding: 8px 14px; min-width: 122px; text-align: center;
+  }
+  #rateNum { font-size: 56px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+  #rateLbl { font-size: 12px; color: var(--muted); margin-top: 4px; letter-spacing: 0.04em; text-transform: uppercase; }
+  #chips { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; min-width: 0; }
+  .chip {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+    padding: 6px 10px; min-width: 0; border-left-width: 5px; border-left-color: var(--muted);
+  }
+  .chip .k { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+  .chip .v { font-size: 16px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .good { color: var(--good); } .warn { color: var(--warn); } .bad { color: var(--bad); }
+  .chip.good { border-left-color: var(--good); color: inherit; }
+  .chip.warn { border-left-color: var(--warn); color: inherit; }
+  .chip.bad  { border-left-color: var(--bad);  color: inherit; }
+
+  /* ---------- cue banner ---------- */
+  #cue {
+    position: fixed; left: 50%; bottom: calc(96px + env(safe-area-inset-bottom));
+    transform: translateX(-50%); max-width: 92vw;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 999px;
+    padding: 12px 22px; font-size: 22px; font-weight: 800; text-align: center;
+    opacity: 0; transition: opacity 0.25s; pointer-events: none;
+  }
+  #cue.show { opacity: 1; }
+
+  /* ---------- controls ---------- */
+  #bar {
+    position: fixed; left: 0; right: 0; bottom: 0;
+    padding: 10px 12px calc(12px + env(safe-area-inset-bottom));
+    display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
+    background: linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0));
+  }
+  button {
+    font: inherit; font-weight: 700; color: var(--text);
+    background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+    padding: 12px 14px; min-height: 48px; cursor: pointer;
+  }
+  button:active { transform: scale(0.97); }
+  button.primary { background: #e23b3b; border-color: #e23b3b; }
+  button[aria-pressed="true"] { border-color: var(--good); color: var(--good); }
+
+  /* ---------- debug ---------- */
+  #debug {
+    position: fixed; left: 12px; right: 12px; bottom: calc(160px + env(safe-area-inset-bottom));
+    background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 8px;
+    display: none;
+  }
+  #debug.show { display: block; }
+  #graph { width: 100%; height: 90px; display: block; }
+  #dbgText { font: 12px/1.4 ui-monospace, Consolas, monospace; color: var(--muted); margin-top: 6px; white-space: pre-wrap; }
+
+  /* ---------- start overlay ---------- */
+  #start {
+    position: fixed; inset: 0; background: var(--bg); z-index: 10;
+    display: flex; align-items: center; justify-content: center; padding: 24px;
+  }
+  #start .card { max-width: 440px; width: 100%; }
+  #start h1 { font-size: 30px; margin: 0 0 6px; }
+  #start p { color: var(--muted); margin: 0 0 18px; }
+  #start ol { padding-left: 20px; margin: 0 0 22px; line-height: 1.6; }
+  #start button { width: 100%; font-size: 20px; padding: 16px; }
+  #startMsg { margin-top: 12px; font-size: 14px; color: var(--muted); min-height: 20px; }
+  #startMsg.bad { color: var(--bad); }
+</style>
+</head>
+<body>
+
+<div id="stage">
+  <canvas id="view"></canvas>
+  <video id="video" playsinline muted></video>
+</div>
+
+<div id="hud">
+  <div id="rateBox">
+    <div id="rateNum">--</div>
+    <div id="rateLbl">per min · target 100–120</div>
+  </div>
+  <div id="chips">
+    <div class="chip" id="cRate"><div class="k">Rate</div><div class="v">Waiting</div></div>
+    <div class="chip" id="cCount"><div class="k">Compressions</div><div class="v">0</div></div>
+    <div class="chip" id="cRecoil"><div class="k">Recoil</div><div class="v">--</div></div>
+    <div class="chip" id="cElbow"><div class="k">Elbows</div><div class="v">--</div></div>
+  </div>
+</div>
+
+<div id="cue"></div>
+
+<div id="debug">
+  <canvas id="graph"></canvas>
+  <div id="dbgText"></div>
+</div>
+
+<div id="bar">
+  <button id="btnFlip">Flip camera</button>
+  <button id="btnVoice" aria-pressed="true">Voice on</button>
+  <button id="btnReset">Reset</button>
+  <button id="btnDebug" aria-pressed="false">Debug</button>
+</div>
+
+<div id="start">
+  <div class="card">
+    <h1>CPR Camera Coach</h1>
+    <p>Tracks compression rate, chest recoil and elbow lock.</p>
+    <ol>
+      <li>Prop the phone side-on, about 1.5–2 m away.</li>
+      <li>Shoulders, elbows and hands must all be in view.</li>
+      <li>Turn the volume up, then start compressions.</li>
+    </ol>
+    <button class="primary" id="btnStart">Start camera</button>
+    <div id="startMsg"></div>
+  </div>
+</div>
+
+<script type="module">
+/* =====================================================================
+   TUNING — everything your team should need to adjust is in this block.
+   ===================================================================== */
+const CONFIG = {
+  // Rate
+  RATE_MIN: 100,            // compressions/min, guideline lower bound
+  RATE_MAX: 120,            // guideline upper bound
+  RATE_WINDOW: 5,           // how many recent intervals the rate is the median of
+  PAUSE_MS: 2500,           // no compression for this long = paused, rate clears
+
+  // Compression detection
+  MIN_TRAVEL: 0.035,        // wrist travel needed to count a push, as a fraction of arm length.
+                            //   Missing real pushes -> lower it. Counting jitter -> raise it.
+  MIN_INTERVAL_MS: 270,     // two pushes closer than this are treated as noise (~220/min)
+  SMOOTHING: 0.5,           // 0..1. Lower = smoother but laggier wrist signal.
+
+  // Recoil
+  RECOIL_TOLERANCE: 0.25,   // hands may stop this fraction of a stroke short of the top before it counts as incomplete
+  RECOIL_WINDOW: 12,        // how many recent "top" positions define the full-release height
+  RECOIL_BAD_COUNT: 3,      // flag recoil when this many ...
+  RECOIL_BAD_OF: 5,         // ... of the last N compressions were incomplete
+
+  // Elbows
+  ELBOW_MIN_DEG: 150,       // below this the arms count as bent (180 = perfectly straight)
+
+  // Pose
+  MIN_VISIBILITY: 0.5,      // landmark confidence needed to trust a joint
+  MODEL: 'lite',            // 'lite' (fast, phone-friendly) | 'full' | 'heavy'
+
+  // Voice cues
+  WARMUP_COMPRESSIONS: 4,   // say nothing until this many pushes in a row
+  CUE_GAP_MS: 4000,         // minimum time between corrective cues
+  GOOD_CUE_GAP_MS: 10000,   // minimum time between "good rhythm" cues
+  DEFAULT_CAMERA: 'user',   // 'user' = selfie cam (rescuer sees the screen) | 'environment' = back cam
+};
+
+const CUES = {
+  slow:   'Push faster',
+  fast:   'Slow down a little',
+  elbow:  'Lock your elbows',
+  recoil: 'Let the chest come all the way up',
+  good:   'Good rhythm, keep going',
+};
+
+/* =====================================================================
+   Analyzer — pure logic, no camera or DOM. Feed it one sample per frame.
+   y is the wrist height in pixels (bigger = lower on screen).
+   ===================================================================== */
+class Analyzer {
+  constructor(cfg) { this.cfg = cfg; this.reset(); }
+
+  reset() {
+    this.y = null;            // smoothed wrist y
+    this.dir = 0;             // 0 = unknown, 1 = heading down, -1 = heading up
+    this.lo = null; this.hi = null;         // extremes while direction is unknown
+    this.ext = null; this.extT = 0;         // running extreme in current direction
+    this.count = 0;           // total compressions
+    this.run = 0;             // compressions since the last pause
+    this.intervals = [];
+    this.lastBottomT = null; this.lastBottomY = null;
+    this.tops = [];
+    this.recoilFlags = [];
+    this.recoilPct = null;
+    this.elbow = null;
+    this.marks = [];          // {t, y, type} for the debug graph
+  }
+
+  push(t, rawY, armLen, elbowDeg) {
+    const c = this.cfg;
+    this.y = this.y === null ? rawY : this.y + c.SMOOTHING * (rawY - this.y);
+    if (elbowDeg != null) this.elbow = this.elbow === null ? elbowDeg : this.elbow + 0.2 * (elbowDeg - this.elbow);
+
+    // Paused? Forget the rhythm so a restart is judged fresh.
+    if (this.lastBottomT !== null && t - this.lastBottomT > c.PAUSE_MS && this.run > 0) {
+      this.run = 0; this.intervals = []; this.recoilFlags = []; this.recoilPct = null;
+    }
+
+    const y = this.y, thr = c.MIN_TRAVEL * armLen;
+
+    if (this.dir === 0) {
+      if (this.lo === null) { this.lo = this.hi = y; this.loT = this.hiT = t; return; }
+      if (y < this.lo) { this.lo = y; this.loT = t; }
+      if (y > this.hi) { this.hi = y; this.hiT = t; }
+      if (y - this.lo > thr) { this._top(this.loT, this.lo); this.dir = 1; this.ext = y; this.extT = t; }
+      else if (this.hi - y > thr) { this.dir = -1; this.ext = y; this.extT = t; }
+      return;
+    }
+
+    if (this.dir === 1) {                      // going down, looking for the bottom
+      if (y >= this.ext) { this.ext = y; this.extT = t; }
+      else if (this.ext - y > thr) { this._bottom(this.extT, this.ext); this.dir = -1; this.ext = y; this.extT = t; }
+    } else {                                   // coming up, looking for the top
+      if (y <= this.ext) { this.ext = y; this.extT = t; }
+      else if (y - this.ext > thr) { this._top(this.extT, this.ext); this.dir = 1; this.ext = y; this.extT = t; }
+    }
+  }
+
+  _bottom(t, y) {
+    const c = this.cfg;
+    if (this.lastBottomT !== null) {
+      const dt = t - this.lastBottomT;
+      if (dt < c.MIN_INTERVAL_MS) return;      // jitter, not a real push
+      if (dt < c.PAUSE_MS) {
+        this.intervals.push(dt);
+        if (this.intervals.length > c.RATE_WINDOW) this.intervals.shift();
+      }
+    }
+    this.count++; this.run++;
+    this.lastBottomT = t; this.lastBottomY = y;
+    this.marks.push({ t, y, type: 'bottom' });
+  }
+
+  _top(t, y) {
+    const c = this.cfg;
+    this.tops.push(y);
+    if (this.tops.length > c.RECOIL_WINDOW) this.tops.shift();
+    this.marks.push({ t, y, type: 'top' });
+    if (this.lastBottomY === null || this.run === 0) return;
+
+    // Full release = the highest the hands have been recently.
+    const refTop = Math.min(...this.tops);
+    const stroke = this.lastBottomY - refTop;
+    if (stroke <= 0) return;
+    const shortfall = (y - refTop) / stroke;
+    this.recoilPct = Math.max(0, Math.min(1, 1 - shortfall));
+    this.recoilFlags.push(shortfall > c.RECOIL_TOLERANCE);
+    if (this.recoilFlags.length > c.RECOIL_BAD_OF) this.recoilFlags.shift();
+  }
+
+  status(t) {
+    const c = this.cfg;
+    const active = this.lastBottomT !== null && t - this.lastBottomT <= c.PAUSE_MS && this.run > 0;
+
+    let rate = null;
+    if (active && this.intervals.length >= 2) {
+      const s = [...this.intervals].sort((a, b) => a - b);
+      const mid = s.length >> 1;
+      const med = s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
+      rate = 60000 / med;
+    }
+    const rateState = rate === null ? 'none' : rate < c.RATE_MIN ? 'slow' : rate > c.RATE_MAX ? 'fast' : 'good';
+
+    let recoilState = 'none';
+    if (active && this.recoilFlags.length >= 2) {
+      const bad = this.recoilFlags.filter(Boolean).length;
+      recoilState = bad >= c.RECOIL_BAD_COUNT ? 'bad' : 'good';
+    }
+
+    const elbowState = this.elbow === null ? 'none' : this.elbow < c.ELBOW_MIN_DEG ? 'bad' : 'good';
+
+    return { active, count: this.count, run: this.run, rate, rateState,
+             recoilState, recoilPct: this.recoilPct, elbowDeg: this.elbow, elbowState };
+  }
+}
+
+/* =====================================================================
+   Coach — decides which single cue to say, and when.
+   ===================================================================== */
+class Coach {
+  constructor(cfg) { this.cfg = cfg; this.reset(); }
+  reset() { this.lastT = -1e9; this.lastGoodT = -1e9; this.lastKey = null; }
+
+  pick(t, s) {
+    const c = this.cfg;
+    if (!s.active || s.run < c.WARMUP_COMPRESSIONS) return null;
+    if (t - this.lastT < c.CUE_GAP_MS) return null;
+
+    const issues = [];
+    if (s.rateState === 'slow') issues.push('slow');
+    if (s.rateState === 'fast') issues.push('fast');
+    if (s.elbowState === 'bad') issues.push('elbow');
+    if (s.recoilState === 'bad') issues.push('recoil');
+
+    let key = null;
+    if (issues.length) {
+      // Don't nag about the same thing twice in a row if something else is also wrong.
+      key = issues[0] === this.lastKey && issues.length > 1 ? issues[1] : issues[0];
+    } else if (s.rateState === 'good' && t - this.lastGoodT >= c.GOOD_CUE_GAP_MS) {
+      key = 'good'; this.lastGoodT = t;
+    }
+    if (key) { this.lastT = t; this.lastKey = key; }
+    return key;
+  }
+}
+
+// Exposed for testing from the console.
+window.__cpr = { CONFIG, CUES, Analyzer, Coach };
+
+/* =====================================================================
+   Camera + pose + UI
+   ===================================================================== */
+const $ = id => document.getElementById(id);
+const video = $('video'), view = $('view'), ctx = view.getContext('2d');
+const graph = $('graph'), gctx = graph.getContext('2d');
+
+const L = { lSh: 11, rSh: 12, lEl: 13, rEl: 14, lWr: 15, rWr: 16, lHip: 23, rHip: 24 };
+const BONES = [[11, 12], [11, 23], [12, 24], [23, 24]];
+const ARMS = [[11, 13], [13, 15], [12, 14], [14, 16]];
+
+const analyzer = new Analyzer(CONFIG);
+const coach = new Coach(CONFIG);
+
+let landmarker = null, stream = null, running = false;
+let facing = CONFIG.DEFAULT_CAMERA, voiceOn = true, debugOn = false;
+let lastVideoT = -1, lastTs = 0, armLen = null, cueTimer = 0;
+let samples = [];          // {t, y} for the debug graph
+let fps = 0, fpsT = 0, fpsN = 0;
+
+const MP_VERSION = '0.10.14';
+const loadModel = (async () => {
+  const { FilesetResolver, PoseLandmarker } =
+    await import(`https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MP_VERSION}/vision_bundle.mjs`);
+  const fileset = await FilesetResolver.forVisionTasks(
+    `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MP_VERSION}/wasm`);
+  const opts = delegate => ({
+    baseOptions: {
+      modelAssetPath: `https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_${CONFIG.MODEL}/float16/1/pose_landmarker_${CONFIG.MODEL}.task`,
+      delegate,
+    },
+    runningMode: 'VIDEO',
+    numPoses: 1,
+  });
+  try { return await PoseLandmarker.createFromOptions(fileset, opts('GPU')); }
+  catch (e) { console.warn('GPU delegate failed, using CPU', e); return await PoseLandmarker.createFromOptions(fileset, opts('CPU')); }
+})();
+loadModel.catch(() => {});   // surfaced when Start is pressed
+
+async function openCamera() {
+  if (stream) stream.getTracks().forEach(t => t.stop());
+  stream = await navigator.mediaDevices.getUserMedia({
+    audio: false,
+    video: { facingMode: facing, width: { ideal: 1280 }, height: { ideal: 720 } },
+  });
+  video.srcObject = stream;
+  await video.play();
+}
+
+function say(key) {
+  const text = CUES[key];
+  const el = $('cue');
+  el.textContent = text;
+  el.className = 'show ' + (key === 'good' ? 'good' : 'warn');
+  clearTimeout(cueTimer);
+  cueTimer = setTimeout(() => el.classList.remove('show'), 2600);
+  if (voiceOn && 'speechSynthesis' in window) {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.rate = 1.1; u.volume = 1;
+    speechSynthesis.speak(u);
+  }
+}
+
+function setChip(id, cls, text) {
+  const el = $(id);
+  el.className = 'chip ' + cls;
+  el.querySelector('.v').textContent = text;
+}
+
+function render(s, seen) {
+  const rn = $('rateNum');
+  rn.textContent = s.rate === null ? '--' : Math.round(s.rate);
+  rn.className = s.rateState === 'good' ? 'good' : s.rateState === 'none' ? '' : 'warn';
+
+  if (!seen) setChip('cRate', 'bad', "Can't see hands");
+  else setChip('cRate',
+    { none: '', slow: 'warn', fast: 'warn', good: 'good' }[s.rateState],
+    { none: s.active ? 'Measuring' : 'Waiting', slow: 'Too slow', fast: 'Too fast', good: 'Good' }[s.rateState]);
+
+  setChip('cCount', '', String(s.count));
+
+  const pct = s.recoilPct === null ? '' : ` ${Math.round(s.recoilPct * 100)}%`;
+  setChip('cRecoil',
+    { none: '', good: 'good', bad: 'bad' }[s.recoilState],
+    { none: '--', good: 'Full' + pct, bad: 'Incomplete' + pct }[s.recoilState]);
+
+  const deg = s.elbowDeg === null ? '' : ` ${Math.round(s.elbowDeg)}°`;
+  setChip('cElbow',
+    { none: '', good: 'good', bad: 'bad' }[s.elbowState],
+    { none: '--', good: 'Locked' + deg, bad: 'Bent' + deg }[s.elbowState]);
+}
+
+function angleAt(a, b, c) {               // angle at b, in degrees
+  const v1x = a.x - b.x, v1y = a.y - b.y, v2x = c.x - b.x, v2y = c.y - b.y;
+  const d = Math.hypot(v1x, v1y) * Math.hypot(v2x, v2y);
+  if (!d) return null;
+  return Math.acos(Math.max(-1, Math.min(1, (v1x * v2x + v1y * v2y) / d))) * 180 / Math.PI;
+}
+
+function drawSkeleton(p, vis, elbowBad) {
+  const seg = (a, b, color, w) => {
+    if (!vis(a) || !vis(b)) return;
+    ctx.strokeStyle = color; ctx.lineWidth = w; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(p[a].x, p[a].y); ctx.lineTo(p[b].x, p[b].y); ctx.stroke();
+  };
+  const w = Math.max(3, view.width / 200);
+  BONES.forEach(([a, b]) => seg(a, b, 'rgba(255,255,255,0.75)', w));
+  ARMS.forEach(([a, b]) => seg(a, b, elbowBad ? '#ff5a5a' : '#2fd27a', w * 1.5));
+  for (const i of [11, 12, 13, 14, 23, 24]) {
+    if (!vis(i)) continue;
+    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(p[i].x, p[i].y, w * 1.2, 0, 7); ctx.fill();
+  }
+  for (const i of [15, 16]) {
+    if (!vis(i)) continue;
+    ctx.fillStyle = '#ffd400'; ctx.beginPath(); ctx.arc(p[i].x, p[i].y, w * 2.2, 0, 7); ctx.fill();
+  }
+}
+
+function drawGraph(now) {
+  const W = graph.clientWidth, H = graph.clientHeight, dpr = devicePixelRatio || 1;
+  if (graph.width !== W * dpr) { graph.width = W * dpr; graph.height = H * dpr; }
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, W, H);
+  const SPAN = 6000, t0 = now - SPAN;
+  samples = samples.filter(s => s.t >= t0);
+  analyzer.marks = analyzer.marks.filter(m => m.t >= t0);
+  if (samples.length < 2) return;
+  let lo = Infinity, hi = -Infinity;
+  for (const s of samples) { if (s.y < lo) lo = s.y; if (s.y > hi) hi = s.y; }
+  const pad = Math.max(4, (hi - lo) * 0.15); lo -= pad; hi += pad;
+  const X = t => (t - t0) / SPAN * W, Y = y => (y - lo) / (hi - lo) * H;
+  gctx.strokeStyle = '#7cc4ff'; gctx.lineWidth = 2; gctx.beginPath();
+  samples.forEach((s, i) => i ? gctx.lineTo(X(s.t), Y(s.y)) : gctx.moveTo(X(s.t), Y(s.y)));
+  gctx.stroke();
+  for (const m of analyzer.marks) {
+    gctx.fillStyle = m.type === 'bottom' ? '#ff5a5a' : '#2fd27a';
+    gctx.beginPath(); gctx.arc(X(m.t), Y(m.y), 4, 0, 7); gctx.fill();
+  }
+}
+
+function frame() {
+  if (!running) return;
+  requestAnimationFrame(frame);
+  if (video.readyState < 2 || video.currentTime === lastVideoT) return;
+  lastVideoT = video.currentTime;
+
+  const W = video.videoWidth, H = video.videoHeight;
+  if (view.width !== W || view.height !== H) { view.width = W; view.height = H; }
+
+  let now = performance.now();
+  if (now <= lastTs) now = lastTs + 1;      // MediaPipe needs strictly increasing timestamps
+  lastTs = now;
+
+  const res = landmarker.detectForVideo(video, now);
+  const lm = res.landmarks && res.landmarks[0];
+
+  ctx.save();
+  if (facing === 'user') { ctx.translate(W, 0); ctx.scale(-1, 1); }   // mirror the selfie cam
+  ctx.drawImage(video, 0, 0, W, H);
+
+  let seen = false, rawY = null, elbowDeg = null;
+  if (lm) {
+    const p = lm.map(k => ({ x: k.x * W, y: k.y * H, v: k.visibility ?? 1 }));
+    const vis = i => p[i].v >= CONFIG.MIN_VISIBILITY;
+
+    // Wrist height: average of whichever wrists we can trust.
+    const wr = [L.lWr, L.rWr].filter(vis);
+    if (wr.length) { rawY = wr.reduce((a, i) => a + p[i].y, 0) / wr.length; seen = true; }
+
+    // Arm length (shoulder -> wrist) is the ruler that makes thresholds distance-independent.
+    const lens = [], angs = [];
+    for (const [sh, el, w] of [[L.lSh, L.lEl, L.lWr], [L.rSh, L.rEl, L.rWr]]) {
+      if (vis(sh) && vis(w)) lens.push(Math.hypot(p[sh].x - p[w].x, p[sh].y - p[w].y));
+      if (vis(sh) && vis(el) && vis(w)) { const a = angleAt(p[sh], p[el], p[w]); if (a !== null) angs.push(a); }
+    }
+    if (lens.length) {
+      const len = Math.max(...lens);
+      armLen = armLen === null ? len : armLen + 0.05 * (len - armLen);
+    }
+    if (angs.length) elbowDeg = angs.reduce((a, b) => a + b, 0) / angs.length;
+
+    if (seen && armLen) {
+      analyzer.push(now, rawY, armLen, elbowDeg);
+      samples.push({ t: now, y: analyzer.y });
+    }
+    drawSkeleton(p, vis, analyzer.elbow !== null && analyzer.elbow < CONFIG.ELBOW_MIN_DEG);
+  }
+  ctx.restore();
+
+  const s = analyzer.status(now);
+  render(s, seen);
+  const key = coach.pick(now, s);
+  if (key) say(key);
+
+  fpsN++;
+  if (now - fpsT > 1000) { fps = fpsN * 1000 / (now - fpsT); fpsN = 0; fpsT = now; }
+  if (debugOn) {
+    drawGraph(now);
+    $('dbgText').textContent =
+      `fps ${fps.toFixed(0)}  video ${W}x${H}  pose ${lm ? 'yes' : 'NO'}  hands ${seen ? 'yes' : 'NO'}\n` +
+      `wristY ${rawY === null ? '-' : rawY.toFixed(0)}  armLen ${armLen ? armLen.toFixed(0) : '-'}px  ` +
+      `threshold ${armLen ? (CONFIG.MIN_TRAVEL * armLen).toFixed(1) : '-'}px\n` +
+      `intervals ${analyzer.intervals.map(v => v.toFixed(0)).join(' ') || '-'} ms  run ${s.run}\n` +
+      `recoil flags ${analyzer.recoilFlags.map(f => f ? 'x' : 'o').join('') || '-'}  elbow ${s.elbowDeg === null ? '-' : s.elbowDeg.toFixed(0)}`;
+  }
+}
+
+/* ---------- buttons ---------- */
+$('btnStart').onclick = async () => {
+  const msg = $('startMsg');
+  msg.className = ''; msg.textContent = 'Loading pose model…';
+  $('btnStart').disabled = true;
+  try {
+    if ('speechSynthesis' in window) speechSynthesis.speak(new SpeechSynthesisUtterance(''));  // unlock audio on mobile
+    landmarker = await loadModel;
+    msg.textContent = 'Opening camera…';
+    await openCamera();
+    try { await navigator.wakeLock?.request('screen'); } catch {}
+    $('start').style.display = 'none';
+    running = true;
+    requestAnimationFrame(frame);
+  } catch (e) {
+    console.error(e);
+    msg.className = 'bad';
+    msg.textContent = !navigator.mediaDevices
+      ? 'Camera needs HTTPS (or localhost). Open this page over https://.'
+      : e.name === 'NotAllowedError' ? 'Camera permission was blocked. Allow it and try again.'
+      : e.name === 'NotFoundError' ? 'No camera found on this device.'
+      : 'Could not start: ' + (e.message || e.name);
+    $('btnStart').disabled = false;
+  }
+};
+
+$('btnFlip').onclick = async () => {
+  facing = facing === 'user' ? 'environment' : 'user';
+  try { await openCamera(); } catch (e) { console.error(e); facing = facing === 'user' ? 'environment' : 'user'; }
+};
+
+$('btnVoice').onclick = e => {
+  voiceOn = !voiceOn;
+  e.currentTarget.setAttribute('aria-pressed', voiceOn);
+  e.currentTarget.textContent = voiceOn ? 'Voice on' : 'Voice off';
+  if (!voiceOn && 'speechSynthesis' in window) speechSynthesis.cancel();
+};
+
+$('btnReset').onclick = () => { analyzer.reset(); coach.reset(); samples = []; armLen = null; };
+
+$('btnDebug').onclick = e => {
+  debugOn = !debugOn;
+  e.currentTarget.setAttribute('aria-pressed', debugOn);
+  $('debug').classList.toggle('show', debugOn);
+};
+</script>
+</body>
+</html>
