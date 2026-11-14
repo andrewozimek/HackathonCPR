@@ -553,7 +553,7 @@ footer .brand { font-size: 1rem; }
             <video id="coachVideo" playsinline muted></video>
             <div class="coach-hud">
               <span id="coachRateNum" class="coach-rate-num">--</span>
-              <span class="coach-rate-lbl">compressions / min<br>target 100–120</span>
+              <span class="coach-rate-lbl">compressions / min<br>target 100–120<br><span id="coachTime"></span></span>
             </div>
             <div id="coachPlaceholder" class="coach-placeholder">
               <svg class="icon" width="20" height="20"><use href="#i-camera"/></svg>
@@ -1009,6 +1009,13 @@ window.CPR_CONFIG = {
     WARMUP_COMPRESSIONS: 4,   // say nothing until this many pushes in a row
     CUE_GAP_MS: 4000,         // minimum time between corrective cues
     GOOD_CUE_GAP_MS: 10000,   // minimum time between "good rhythm" cues
+    VOICE_NAMES: ['google uk english male', 'daniel', 'arthur', 'oliver', 'microsoft ryan', 'microsoft george'],
+                              // voices to prefer, first match wins; then any British English voice; then the device default
+    VOICE_PITCH: 0.9,         // 0..2, lower = deeper
+    VOICE_RATE: 1.05,         // speaking speed
+
+    // Session
+    SESSION_SECONDS: 60,      // live camera: stop and show the score this long after the first push. 0 = no limit.
 
     // Score weights (must not all be zero)
     SCORE: { rate: 0.35, recoil: 0.25, handsOn: 0.2, elbows: 0.1, arms: 0.1 },
@@ -1373,13 +1380,35 @@ window.CPR_CONFIG = {
     el.className = 'coach-cue show ' + (key === 'good' ? 'good' : 'warn');
     clearTimeout(cueTimer);
     cueTimer = setTimeout(() => el.classList.remove('show'), 2600);
-    if (voiceOn && 'speechSynthesis' in window) {
-      speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(text);
-      u.rate = 1.1; u.volume = 1;
-      speechSynthesis.speak(u);
-    }
+    speak(text);
   }
+
+  // Voice: prefer a British male voice if this device has one.
+  let voice = null;
+  function pickVoice() {
+    const vs = speechSynthesis.getVoices();
+    voice = null;
+    for (const n of CONFIG.VOICE_NAMES) {
+      const v = vs.find((x) => x.name.toLowerCase().includes(n));
+      if (v) { voice = v; return; }
+    }
+    voice = vs.find((x) => /^en[-_]GB/i.test(x.lang)) || null;
+  }
+  if ('speechSynthesis' in window) {
+    pickVoice();
+    speechSynthesis.addEventListener?.('voiceschanged', pickVoice);   // the list often arrives late
+  }
+
+  function speak(text) {
+    if (!voiceOn || !('speechSynthesis' in window)) return;
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    if (voice) { u.voice = voice; u.lang = voice.lang; }
+    u.pitch = CONFIG.VOICE_PITCH; u.rate = CONFIG.VOICE_RATE; u.volume = 1;
+    speechSynthesis.speak(u);
+  }
+
+  const clock = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
 
   function setMetric(id, cls, text) {
     const el = $(id);
@@ -1388,7 +1417,8 @@ window.CPR_CONFIG = {
   }
   const P = (v) => `${Math.round(v * 100)}%`;
 
-  function render(s, seen) {
+  function render(s, seen, left) {
+    $('coachTime').textContent = left == null ? '' : `${clock(left)} left`;
     const rn = $('coachRateNum');
     rn.textContent = s.rate === null ? '--' : Math.round(s.rate);
     rn.className = 'coach-rate-num ' + (s.rateState === 'good' ? 'is-good' : s.rateState === 'none' ? '' : 'is-warn');
@@ -1518,7 +1548,15 @@ window.CPR_CONFIG = {
     ctx.restore();
 
     const s = analyzer.status(t);
-    render(s, seen);
+
+    // Live sessions end by themselves: a fixed time after the first push, show the score.
+    let left = null;
+    if (CONFIG.SESSION_SECONDS && source === 'camera' && analyzer.firstBottomT !== null) {
+      left = Math.max(0, CONFIG.SESSION_SECONDS - (t - analyzer.firstBottomT) / 1000);
+      if (left === 0) { render(s, seen, left); showScore(); speak("Time. Here's your score."); return; }
+    }
+
+    render(s, seen, left);
     const key = coach.pick(t, s);
     if (key) say(key);
 
@@ -1647,6 +1685,7 @@ window.CPR_CONFIG = {
     $('coachCue').classList.remove('show');
     $('coachPlaceholder').style.display = 'flex';
     $('coachStart').textContent = 'Start AI coach';
+    $('coachTime').textContent = '';
   }
 
   /* ---------- buttons ---------- */
