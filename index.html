@@ -1102,7 +1102,8 @@ body.coach-focus .dock-mic { flex: 1 0 100%; justify-content: center; }
       <div class="who"><span class="avatar"><svg class="icon" width="20" height="20"><use href="#i-pulse"/></svg></span><div>Your coach<small>Tips and answers, all in one place</small></div></div>
       <button id="focusFinish" class="btn primary" type="button">Finish &amp; score</button>
       <button id="focusStop" class="btn ghost" type="button">Stop</button>
-      <button id="focusExit" class="btn ghost" type="button">Exit full screen</button>
+      <button id="focusFull" class="btn ghost" type="button">Full screen</button>
+      <button id="focusExit" class="btn ghost" type="button">Exit coach view</button>
     </div>
     <div id="coachFeed" class="coach-feed" aria-live="polite"><p class="feed-empty">Form tips and your answers show up here. Say "Coach, ..." or type a question.</p></div>
     <div id="dockAnswer" class="dock-answer" aria-live="polite"><button class="x" id="dockClose" aria-label="Hide answer">&times;</button><div class="q"></div><div class="a"></div></div>
@@ -2574,10 +2575,13 @@ window.CPR_CONFIG = {
     document.body.classList.remove('coach-focus');
     if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {});
   }
-  document.addEventListener('fullscreenchange', () => {
-    // Pressing Esc leaves full screen: go back to the normal page layout too (the camera keeps running).
-    if (!document.fullscreenElement && document.body.classList.contains('coach-focus')) document.body.classList.remove('coach-focus');
-  });
+  // The coach view fills the window either way. Chrome drops true full screen when it shows the camera
+  // permission prompt, so the panel has a Full screen button to go back in with one click.
+  function syncFullBtn() {
+    const b = $('focusFull');
+    if (b) b.textContent = document.fullscreenElement ? 'Leave full screen' : 'Full screen';
+  }
+  document.addEventListener('fullscreenchange', syncFullBtn);
 
   /* ---------- buttons ---------- */
   window.addEventListener('DOMContentLoaded', () => {
@@ -2637,6 +2641,10 @@ window.CPR_CONFIG = {
     $('focusFinish').addEventListener('click', () => $('coachFinish').click());
     $('focusStop').addEventListener('click', () => { if (running) stop(); else exitFocus(); });
     $('focusExit').addEventListener('click', () => { document.body.classList.remove('coach-focus'); if (document.fullscreenElement) document.exitFullscreen().catch(() => {}); });
+    $('focusFull').addEventListener('click', () => {
+      if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+      else if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => {});
+    });
 
     $('coachDebugBtn').addEventListener('click', (e) => {
       debugOn = !debugOn;
