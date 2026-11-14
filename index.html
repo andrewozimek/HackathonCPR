@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#070f1f">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#131e2d" media="(prefers-color-scheme: dark)">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -888,6 +889,59 @@ body.coach-focus .agent-dock .dock-status { padding: 0 4px; }
 body.coach-focus .coach-box { margin: 0; border-radius: 16px; border-width: 1.5px; }   /* undo the phone edge-to-edge camera */
 @media (max-width: 900px) {
   body.coach-focus .agent-dock { max-height: none; }
+}
+
+/* Phones in coach view: the camera gets most of the screen.
+   Edge-to-edge camera, score cards in one swipeable row, and a compact coach panel (buttons, last few lines, ask box). */
+@media (max-width: 640px) {
+  body.coach-focus #coach { padding: env(safe-area-inset-top) 0 calc(206px + env(safe-area-inset-bottom)); }
+  body.coach-focus .coach-main { gap: 6px; }
+  body.coach-focus .coach-box { border-radius: 0; border-width: 0 0 1.5px; }
+  body.coach-focus .metrics { display: flex; flex-shrink: 0; gap: 6px; padding: 0 8px; overflow-x: auto; scrollbar-width: none; }
+  body.coach-focus .metric { flex: 0 0 auto; min-width: 104px; padding: 6px 10px; border-radius: 10px; }
+  body.coach-focus .metric::before { top: 9px; right: 9px; width: 8px; height: 8px; }
+  body.coach-focus .metric .k { font-size: .72rem; padding-right: 14px; }
+  body.coach-focus .metric .v { margin: 0; font-size: .95rem; }
+
+  body.coach-focus .agent-dock { top: auto; left: 6px; right: 6px; bottom: calc(6px + env(safe-area-inset-bottom)); height: 194px; padding: 10px; gap: 8px; border-radius: 18px; }
+  body.coach-focus .dock-head { flex-wrap: nowrap; gap: 6px; }
+  body.coach-focus .dock-head .who { display: none; }
+  body.coach-focus .dock-head .btn { min-height: 36px; padding: 4px 6px; font-size: .76rem; line-height: 1.1; }
+  body.coach-focus .agent-dock .coach-feed { flex: 1 1 auto; min-height: 0; padding: 8px; }
+  body.coach-focus .feed-msg { font-size: .85rem; padding: 6px 10px; }
+  body.coach-focus .dock-bar { flex-wrap: nowrap; gap: 6px; }
+  body.coach-focus .dock-mic { flex: none; height: 40px; padding: 0 12px; }
+  body.coach-focus .dock-form input { padding: 8px 12px; }
+  body.coach-focus .dock-form button { width: 40px; height: 40px; }
+  body.coach-focus .agent-dock .dock-status { min-height: 0; padding: 0; }
+  body.coach-focus #dockStatus { display: none; }   /* keep the "Stop talking" button, drop the hint text */
+}
+
+/* ===== Phones & tablets: lighter effects so scrolling and animations stay smooth =====
+   Blur behind a sticky bar, a glow filter on a moving line, and blur-in animations all have to be
+   redrawn every frame. They look nearly the same without those on a small screen. */
+@keyframes hero-in-lite { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@media (max-width: 900px), (hover: none) {
+  .topbar { backdrop-filter: none; -webkit-backdrop-filter: none; background: var(--surface); }
+  .eyebrow, .coach-hud, .coach-cue { backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .coach-hud { background: rgba(10, 22, 38, .9); }
+  .coach-cue { background: rgba(10, 22, 38, .92); }
+  .page-head::after { filter: none; opacity: .75; }   /* heartbeat line: no per-frame glow */
+  .grad { filter: none; }
+  .page.active .page-head > * { animation-name: hero-in-lite; animation-duration: .6s; }
+  .brand-mark { box-shadow: none; }
+}
+/* Pause the heartbeat line once its header has scrolled away (class set by reveal.js) */
+.page-head.offscreen::after { animation-play-state: paused; }
+
+/* Touch scrolling: keep scrolls inside the chat, suggestions, score cards and menu from dragging the whole page */
+.coach-feed, .dock-chips, .metrics, .nav, .dock-answer { overscroll-behavior: contain; }
+.dock-chips, body.coach-focus .metrics { scroll-snap-type: x proximity; }
+.dock-chips .chip, body.coach-focus .metric { scroll-snap-align: start; }
+/* Tap feedback on touch screens (there's no hover there) */
+@media (hover: none) {
+  .menu-btn:active, .dock-fab:active, .nav-emergency:active, .top-link:active, .chip:active, .nav a:active { transform: scale(.95); }
+  .menu-btn, .dock-fab, .top-link, .chip, .nav a { transition: transform .12s ease-out, background .15s, color .15s; }
 }
 </style>
 </head>
@@ -2687,9 +2741,31 @@ window.CPR_CONFIG = {
     });
   });
 
+  // Getting the pose model ready early makes Start feel instant, but it's ~10 MB and heavy to set up.
+  // Computers: fetch it once the page has settled. Phones / data saver: only when the camera is about
+  // to scroll into view (or Start is pressed), so opening the site stays fast and smooth.
+  let prefetchIO = null;
+  function prefetchModel() {
+    if (modelPromise || prefetchIO) return;
+    const saveData = !!(navigator.connection && navigator.connection.saveData);
+    const isPhone = matchMedia('(max-width: 900px), (pointer: coarse)').matches;
+    const box = document.querySelector('.coach-box');
+    if ((isPhone || saveData) && box && 'IntersectionObserver' in window) {
+      prefetchIO = new IntersectionObserver((entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        prefetchIO.disconnect(); prefetchIO = null;
+        loadModel().catch(() => {});
+      }, { rootMargin: '300px 0px' });
+      prefetchIO.observe(box);
+      return;
+    }
+    const idle = window.requestIdleCallback || ((fn) => setTimeout(fn, 1500));
+    idle(() => loadModel().catch(() => {}), { timeout: 4000 });
+  }
+
   // Called by app.js when the Coach page is opened / left.
   window.CPR_COACH = {
-    onShow() { loadModel().catch(() => {}); },
+    onShow() { prefetchModel(); },
     isRunning: () => running,
     // The coach's British voice, shared so the assistant and metronome sound like the same coach.
     voice: () => ({ voice, pitch: CONFIG.VOICE_PITCH, rate: CONFIG.VOICE_RATE }),
@@ -2768,6 +2844,13 @@ document.querySelectorAll('[data-scroll-to]').forEach((btn) => btn.addEventListe
   const el = document.querySelector(btn.dataset.scrollTo);
   if (el) el.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
 }));
+
+/* ===== pause off-screen header animation ===== */
+// The moving heartbeat line keeps redrawing even when scrolled away; pause it until its header is back in view.
+if ('IntersectionObserver' in window) {
+  const headIO = new IntersectionObserver((entries) => entries.forEach((e) => e.target.classList.toggle('offscreen', !e.isIntersecting)));
+  document.querySelectorAll('.page-head').forEach((el) => headIO.observe(el));
+}
 
 /* ===== reveal.js ===== */
 // Scroll reveal: fades cards in as they come into view (skipped for reduced motion).
