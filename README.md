@@ -1,18 +1,18 @@
 # CPR Coach (hackathon starter)
 
-One file: `website.html`. All the HTML, CSS and JavaScript are inside it, so it looks the same wherever you open it. No build step, no npm. It's designed for desktop/laptop screens.
+One file: `index.html`. All the HTML, CSS and JavaScript are inside it, so it looks the same wherever you open it. No build step, no npm. It's designed for desktop/laptop screens.
 
-`camera.html` is the standalone, full-screen version of the camera coach (phone-friendly). The same coach is built into the **Coach** page of `website.html`.
+`camera.html` is the standalone, full-screen version of the camera coach (phone-friendly). The same coach is built into the **Coach** page of `index.html`.
 
 ## How to open it
 
-- Quickest: double-click `website.html`. Everything works except the camera, which browsers only allow on `localhost` or `https`.
-- Better (camera works): in this folder run `python3 -m http.server 8000`, then open http://localhost:8000/website.html (or use VS Code "Live Server").
-- To share a live link: drag the folder onto Netlify Drop, or push it to GitHub and turn on GitHub Pages. Hosts serve `index.html` by default, so link to `/website.html` directly.
+- Quickest: double-click `index.html`. Everything works except the camera, which browsers only allow on `localhost` or `https`.
+- Better (camera works): in this folder run `python3 -m http.server 8000`, then open http://localhost:8000 (or use VS Code "Live Server").
+- To share a live link: drag the folder onto Netlify Drop, or push it to GitHub and turn on GitHub Pages.
 
 Needs internet for the fonts (Google Fonts) and the camera coach's pose model (MediaPipe from jsDelivr / Google Storage, about 10 MB, loaded the first time you open the Coach page). Without internet it still works, just with system fonts and no camera coach.
 
-## Where things are inside website.html
+## Where things are inside index.html
 
 Search for these comment headers:
 
