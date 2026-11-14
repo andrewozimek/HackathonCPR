@@ -403,9 +403,13 @@ main { padding-bottom: 150px; }
 .coach-score-num.warn { color: #fbbf24; }
 .coach-score-num.bad { color: #fb7185; }
 .coach-score-lbl { color: #94a3b8; font-size: .95rem; }
-.coach-score-rows { display: grid; grid-template-columns: 1fr 1fr; column-gap: 28px; margin-bottom: 16px; }
-.coach-score-rows .row { display: flex; justify-content: space-between; gap: 10px; padding: 8px 0; border-bottom: 1px solid #22344d; font-size: .95rem; }
-.coach-score-rows .row b { font-variant-numeric: tabular-nums; }
+.coach-score-rows { max-width: 60ch; margin-bottom: 18px; }
+.coach-score-rows .score-title { margin: 0 0 6px; font-family: var(--display); font-size: clamp(1.4rem, 3vw, 1.9rem); font-weight: 800; color: #fff; }
+.coach-score-rows .score-meaning { margin: 0 0 14px; color: #cbd6e4; font-size: 1rem; line-height: 1.5; }
+.coach-score-rows .score-sub { margin: 0 0 6px; font-size: .78rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: #94a3b8; }
+.coach-score-rows .score-tips { margin: 0 0 12px; padding-left: 20px; display: grid; gap: 6px; font-weight: 600; }
+.coach-score-rows .score-wins { margin: 0 0 10px; color: #6ee7b7; font-weight: 600; }
+.coach-score-rows .score-foot { margin: 14px 0 0; color: #94a3b8; font-size: .82rem; }
 .coach-file { display: flex; align-items: center; justify-content: center; cursor: pointer; }
 .coach-file input { display: none; }
 
@@ -473,7 +477,6 @@ footer .brand { font-size: 1.05rem; color: #fff; }
   .coach-placeholder span, .coach-placeholder .icon { display: none; }
   .page-head { background: radial-gradient(600px 300px at 90% -20%, var(--hero-2), transparent 70%), var(--hero); }
   .tool-list, .tab-panel, .stats { grid-template-columns: 1fr; }
-  .coach-score-rows { grid-template-columns: 1fr; }
   .call-911 { padding: 22px; }
   footer { padding: 24px 16px 32px; }
 }
@@ -917,6 +920,31 @@ body.coach-focus .coach-box { margin: 0; border-radius: 16px; border-width: 1.5p
   body.coach-focus #dockStatus { display: none; }   /* keep the "Stop talking" button, drop the hint text */
 }
 
+/* ===== Test timer (top left) and 3-2-1-Go countdown on the camera ===== */
+.coach-hud { left: auto; right: 16px; }   /* rate readout moves to the top right; the timer has the top left */
+.coach-timer {
+  position: absolute; top: 16px; left: 16px; z-index: 3; display: none; align-items: baseline; gap: 6px;
+  padding: 8px 16px; border-radius: 14px; background: rgba(10, 22, 38, .88); border: 1px solid rgba(255, 255, 255, .12); color: #fff;
+}
+.coach-timer.show { display: flex; }
+.coach-timer .tm-num { font-family: var(--display); font-size: clamp(1.9rem, 4vw, 2.8rem); font-weight: 800; line-height: 1; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.coach-timer .tm-lbl { font-size: .82rem; font-weight: 600; color: #c3d0db; }
+.coach-timer.low .tm-num { color: #fcd34d; }   /* last 10 seconds */
+.coach-countdown {
+  position: absolute; inset: 0; z-index: 3; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+  background: rgba(7, 16, 28, .45); color: #fff; text-align: center; pointer-events: none;
+}
+.coach-countdown.show { display: flex; }
+.cd-lbl { font-size: clamp(1rem, 2.4vw, 1.35rem); font-weight: 700; color: #dbe6f3; }
+.cd-num { font-family: var(--display); font-size: clamp(6rem, 24vw, 12rem); font-weight: 800; line-height: 1; letter-spacing: -.04em; text-shadow: 0 8px 40px rgba(0, 0, 0, .5); }
+.cd-num.pop { animation: cd-pop .95s var(--ease-out) both; }
+@keyframes cd-pop { 0% { transform: scale(1.6); opacity: 0; } 22% { transform: scale(1); opacity: 1; } 78% { opacity: 1; } 100% { transform: scale(.88); opacity: 0; } }
+@media (max-width: 640px) {
+  .coach-hud { left: auto; right: 10px; }
+  .coach-timer { top: 10px; left: 10px; padding: 6px 12px; border-radius: 12px; }
+  .coach-timer .tm-num { font-size: 2rem; }
+}
+
 /* ===== Phones & tablets: lighter effects so scrolling and animations stay smooth =====
    Blur behind a sticky bar, a glow filter on a moving line, and blur-in animations all have to be
    redrawn every frame. They look nearly the same without those on a small screen. */
@@ -1116,10 +1144,12 @@ body.coach-focus .coach-box { margin: 0; border-radius: 16px; border-width: 1.5p
               <p id="coachMsg" class="coach-msg"></p>
             </div>
             <div id="coachCue" class="coach-cue"></div>
+            <div id="coachTimer" class="coach-timer"><span class="tm-num">1:00</span><span class="tm-lbl">left</span></div>
+            <div id="coachCountdown" class="coach-countdown" aria-live="assertive"><span class="cd-lbl">Get in position</span><span class="cd-num">3</span></div>
             <div id="coachScore" class="coach-score">
               <div class="coach-score-top">
                 <span id="coachScoreNum" class="coach-score-num">--</span>
-                <span class="coach-score-lbl">overall score out of 100</span>
+                <span class="coach-score-lbl">out of 100</span>
               </div>
               <div id="coachScoreRows" class="coach-score-rows"></div>
               <button id="coachAgain" class="btn primary">Go again</button>
@@ -1962,7 +1992,8 @@ window.CPR_CONFIG = {
     VOICE_RATE: 1.05,         // speaking speed
 
     // Session
-    SESSION_SECONDS: 60,      // live camera: stop and show the score this long after the first push. 0 = no limit.
+    SESSION_SECONDS: 60,      // live camera: the test runs this long after "Go", then shows the score. 0 = no limit.
+    COUNTDOWN_SECONDS: 3,     // live camera: 3-2-1-Go before the test starts (time to get in position). 0 = no countdown.
 
     // Score weights (must not all be zero)
     SCORE: { rate: 0.35, recoil: 0.25, handsOn: 0.2, elbows: 0.1, arms: 0.1 },
@@ -2249,6 +2280,8 @@ window.CPR_CONFIG = {
   let landmarker = null, modelPromise = null, stream = null, running = false, wakeLock = null;
   let source = null;                   // 'camera' | 'file'
   let held = false;                    // true while the score card is showing
+  let countingDown = false;            // true during 3-2-1-Go: show the camera, measure nothing
+  let goAt = 0;                        // performance.now() at "Go"; the test timer counts from here
   let startToken = 0;                  // bumps on stop(), so a slow start() can tell it was cancelled
   let loopGen = 0;                     // bumps whenever the frame loop is restarted or stopped
   let facing = CONFIG.DEFAULT_CAMERA, voiceOn = true, debugOn = false;
@@ -2369,7 +2402,10 @@ window.CPR_CONFIG = {
   const P = (v) => `${Math.round(v * 100)}%`;
 
   function render(s, seen, left) {
-    $('coachTime').textContent = left == null ? '' : `${clock(left)} left`;
+    $('coachTime').textContent = '';
+    const tm = $('coachTimer');
+    if (left == null) tm.classList.remove('show');
+    else { tm.querySelector('.tm-num').textContent = clock(left); tm.classList.add('show'); tm.classList.toggle('low', left <= 10); }
     const rn = $('coachRateNum');
     rn.textContent = s.rate === null ? '--' : Math.round(s.rate);
     rn.className = 'coach-rate-num ' + (s.rateState === 'good' ? 'is-good' : s.rateState === 'none' ? '' : 'is-warn');
@@ -2453,6 +2489,14 @@ window.CPR_CONFIG = {
     if (t < lastT) resetAll();                // video restarted or seeked backwards
     lastT = t;
 
+    if (countingDown) {                       // 3-2-1: show the camera so you can get in position, measure nothing
+      ctx.save();
+      if (source === 'camera' && facing === 'user') { ctx.translate(W, 0); ctx.scale(-1, 1); }
+      ctx.drawImage(video, 0, 0, W, H);
+      ctx.restore();
+      return;
+    }
+
     mpTs = Math.max(mpTs + 1, performance.now());   // MediaPipe needs strictly increasing timestamps
     const res = landmarker.detectForVideo(video, mpTs);
     const lm = res.landmarks && res.landmarks[0];
@@ -2500,10 +2544,10 @@ window.CPR_CONFIG = {
 
     const s = analyzer.status(t);
 
-    // Live sessions end by themselves: a fixed time after the first push, show the score.
+    // Live sessions end by themselves: a fixed time after "Go", show the score.
     let left = null;
-    if (CONFIG.SESSION_SECONDS && source === 'camera' && analyzer.firstBottomT !== null) {
-      left = Math.max(0, CONFIG.SESSION_SECONDS - (t - analyzer.firstBottomT) / 1000);
+    if (CONFIG.SESSION_SECONDS && source === 'camera' && goAt) {
+      left = Math.max(0, CONFIG.SESSION_SECONDS - (performance.now() - goAt) / 1000);
       if (left === 0) { render(s, seen, left); showScore(); speak("Time. Here's your score."); return; }
     }
 
@@ -2553,6 +2597,28 @@ window.CPR_CONFIG = {
     next();
   }
 
+  /* ---------- 3-2-1-Go countdown ---------- */
+  // Before a live camera test: big 3, 2, 1, Go! over the camera (spoken too). Measuring and the timer start at Go.
+  function popText(el, text) { el.textContent = text; el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); }
+  async function countdown(token) {
+    const box = $('coachCountdown'), num = box.querySelector('.cd-num');
+    const live = () => token === startToken && running;
+    countingDown = true; goAt = 0;
+    $('coachTimer').classList.remove('show');
+    box.classList.add('show');
+    for (let n = CONFIG.COUNTDOWN_SECONDS; n >= 1; n--) {
+      if (!live()) break;
+      popText(num, String(n)); speak(String(n));
+      await new Promise((r) => setTimeout(r, 1000));
+    }
+    if (!live()) { box.classList.remove('show'); countingDown = false; return false; }
+    popText(num, 'Go!'); speak('Go!');
+    resetAll(); render(analyzer.status(0), true);
+    countingDown = false; goAt = performance.now();
+    setTimeout(() => { if (!countingDown) box.classList.remove('show'); }, 800);
+    return true;
+  }
+
   /* ---------- score card ---------- */
   function showScore() {
     const s = analyzer.summary(Math.max(lastT, analyzer.lastBottomT ?? 0));
@@ -2563,24 +2629,51 @@ window.CPR_CONFIG = {
     const num = $('coachScoreNum');
     num.textContent = s.score === null ? '--' : s.score;
     num.className = 'coach-score-num ' + (s.score === null ? '' : s.score >= 80 ? 'good' : s.score >= 60 ? 'warn' : 'bad');
-    const pc = (v) => v === null ? '--' : P(v);
+    // Explain what the score means for the person, not how it was worked out.
     const mm = Math.floor(s.durationS / 60), ss = String(Math.round(s.durationS % 60)).padStart(2, '0');
-    const rows = s.compressions < 2 ? [['No compressions detected', '']] : [
-      ['Time', `${mm}:${ss}`],
-      ['Compressions', s.compressions],
-      ['Average rate', s.avgRate === null ? '--' : `${Math.round(s.avgRate)} / min`],
-      ['Rate in 100–120 target', pc(s.rateInTarget)],
-      ['Full recoil', pc(s.fullRecoil)],
-      ['Hands-on time', pc(s.handsOn)],
-      ['Elbows locked', pc(s.elbowsLocked)],
-      ['Arms over chest', pc(s.armsOverChest)],
-    ];
+    let title, meaning;
+    if (s.score === null) {
+      title = 'No compressions seen';
+      meaning = 'Set the camera side-on so your shoulders, elbows and hands are all in view, then try again.';
+    } else if (s.score >= 90) {
+      title = 'Excellent';
+      meaning = 'This is high-quality CPR, close to what the guidelines ask for. Pushes like these keep blood moving to the brain and heart until help or an AED arrives.';
+    } else if (s.score >= 80) {
+      title = 'Good';
+      meaning = 'Solid, effective CPR. A small fix or two would make every push count even more.';
+    } else if (s.score >= 60) {
+      title = 'Getting there';
+      meaning = "Your CPR would help, but some pushes weren't steady or full enough to move as much blood as they could.";
+    } else {
+      title = 'Keep practicing';
+      meaning = "Right now many pushes wouldn't move enough blood. That's normal at first; another round or two with the tips below makes a big difference.";
+    }
+    // The weakest areas become "work on next" tips; the strongest become "what went well".
+    const areas = [
+      { v: s.rateInTarget, good: 'a steady pace',
+        tip: s.avgRate !== null && s.avgRate < 100 ? 'Push faster: aim for 100 to 120 a minute, about 2 pushes every second.'
+           : s.avgRate !== null && s.avgRate > 120 ? 'Slow down a little: aim for 100 to 120 a minute. Rushing makes pushes shallow.'
+           : 'Keep an even beat of 100 to 120 a minute. The Metronome page helps you lock it in.' },
+      { v: s.fullRecoil, good: 'full recoil', tip: 'Let the chest come all the way back up after every push, so the heart can refill.' },
+      { v: s.handsOn, good: 'few pauses', tip: 'Keep your hands on the chest with fewer pauses. Blood flow drops every time you stop.' },
+      { v: s.elbowsLocked, good: 'locked arms', tip: 'Lock your elbows and push with your body weight, not your arms.' },
+      { v: s.armsOverChest, good: 'good body position', tip: 'Get your shoulders straight above your hands so you push straight down.' },
+    ].filter((a) => a.v !== null && a.v !== undefined);
+    const tips = areas.filter((a) => a.v < 0.75).sort((a, b) => a.v - b.v).slice(0, 2).map((a) => a.tip);
+    const wins = areas.filter((a) => a.v >= 0.85).map((a) => a.good);
+
     const box = $('coachScoreRows'); box.textContent = '';
-    for (const [k, v] of rows) {
-      const r = document.createElement('div'); r.className = 'row';
-      const a = document.createElement('span'); a.textContent = k;
-      const b = document.createElement('b'); b.textContent = v;
-      r.append(a, b); box.append(r);
+    const add = (tag, cls, text) => { const el = document.createElement(tag); if (cls) el.className = cls; el.textContent = text; box.append(el); return el; };
+    add('h4', 'score-title', title);
+    add('p', 'score-meaning', meaning);
+    if (s.score !== null) {
+      if (tips.length) {
+        add('h5', 'score-sub', 'Work on next');
+        const ul = add('ul', 'score-tips', '');
+        tips.forEach((t) => { const li = document.createElement('li'); li.textContent = t; ul.append(li); });
+      } else add('p', 'score-wins', 'Nothing to fix: you did everything the coach looks for. Keep it up.');
+      if (wins.length) add('p', 'score-wins', 'What went well: ' + (wins.length > 1 ? wins.slice(0, -1).join(', ') + ' and ' + wins[wins.length - 1] : wins[0]) + '.');
+      add('p', 'score-foot', `${s.compressions} compressions in ${mm}:${ss}. A practice score, not a certification. Any CPR is better than none.`);
     }
     $('coachScore').classList.add('show');
     return s;
@@ -2610,8 +2703,12 @@ window.CPR_CONFIG = {
       $('coachFlip').disabled = source !== 'camera';
       running = true;
       startLoop();
-      if (window.CPR_AGENT && source === 'camera') window.CPR_AGENT.autoHandsFree(true);   // talk to the coach right away
       fitBox();
+      btn.disabled = false;                   // Stop works during the countdown
+      if (source === 'camera' && CONFIG.COUNTDOWN_SECONDS > 0) {
+        if (!(await countdown(token))) return;   // stopped during the countdown
+      } else goAt = performance.now();
+      if (window.CPR_AGENT && source === 'camera') window.CPR_AGENT.autoHandsFree(true);   // talk to the coach right away
     } catch (e) {
       console.error(e);
       msg.className = 'coach-msg bad';
@@ -2648,6 +2745,9 @@ window.CPR_CONFIG = {
     $('coachPlaceholder').style.display = 'flex';
     $('coachStart').textContent = 'Start AI coach';
     $('coachTime').textContent = '';
+    countingDown = false; goAt = 0;
+    $('coachCountdown').classList.remove('show');
+    $('coachTimer').classList.remove('show');
     exitFocus();
     if (window.CPR_AGENT) window.CPR_AGENT.autoHandsFree(false);
   }
@@ -2710,6 +2810,7 @@ window.CPR_CONFIG = {
 
     $('coachReset').addEventListener('click', () => {
       resetAll();
+      if (goAt) goAt = performance.now();     // the test timer starts over too
       render(analyzer.status(0), true);
     });
 
@@ -2720,7 +2821,9 @@ window.CPR_CONFIG = {
     });
 
     $('coachAgain').addEventListener('click', async () => {
-      hideScore(); resetAll();
+      hideScore();
+      if (source === 'camera' && running && CONFIG.COUNTDOWN_SECONDS > 0) { countdown(startToken); return; }   // 3-2-1 again
+      resetAll(); goAt = goAt ? performance.now() : 0;
       render(analyzer.status(0), true);
       if (source === 'file') { video.currentTime = 0; try { await video.play(); } catch (e) { console.error(e); } }
     });
