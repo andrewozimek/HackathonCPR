@@ -31,7 +31,7 @@ Page content (text, steps, Learn facts) is plain HTML in the `<main>` section, o
 
 ## The RAG assistant (live)
 
-The site talks to the CPR RAG agent on Cloudflare: `https://cpr-rag-agent.andrewozimek01.workers.dev/ask` (`chatUrl` in the config block). It uses Workers AI over a knowledge base written from the 2025 AHA CPR guidelines: Llama 3.1 8B for fast answers during CPR, Llama 3.3 70B for fuller explanations, instant pre-written answers for the most common questions, and Deepgram Aura for a natural speaking voice.
+The site talks to the CPR RAG agent on Cloudflare: `https://cpr-rag-agent.andrewozimek01.workers.dev/ask` (`chatUrl` in the config block). It uses Workers AI over a knowledge base written from the 2025 AHA CPR guidelines: Llama 3.1 8B for fast answers during CPR, Llama 3.3 70B for fuller explanations, instant pre-written answers for the most common questions, and an optional Deepgram Aura voice.
 
 Where it shows up:
 
@@ -51,7 +51,7 @@ POST /ask
 POST /tts   { "text": "..." }   -> MP3 audio
 ```
 
-Set `naturalVoice: false` in the config to use the browser's built-in voice instead. If `chatUrl` is empty, the Ask page falls back to offline placeholder replies. Voice questions need Chrome or Edge; other browsers can still type. The agent's own test page is at `https://cpr-rag-agent.andrewozimek01.workers.dev/`.
+Answers are spoken in the camera coach's British voice (`VOICE_NAMES` in the coach config), so the coach, metronome and assistant all sound like one coach. Set `naturalVoice: true` in the config to use the agent's Deepgram AI voice instead (about a second slower). If `chatUrl` is empty, the Ask page falls back to offline placeholder replies. Voice questions need Chrome or Edge; other browsers can still type. The agent's own test page is at `https://cpr-rag-agent.andrewozimek01.workers.dev/`.
 
 ## Notes
 

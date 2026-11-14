@@ -694,7 +694,7 @@ window.CPR_CONFIG = {
   // CPR RAG agent (Cloudflare Worker + Workers AI). Leave empty ("") to use the offline placeholder replies.
   //   (the agent also serves a natural voice at the same address with /tts instead of /ask)
   chatUrl: "https://cpr-rag-agent.andrewozimek01.workers.dev/ask",
-  naturalVoice: true,   // false = use the browser's built-in voice for answers
+  naturalVoice: false,  // false = answers use the camera coach's British voice (instant); true = Deepgram AI voice from the agent
 
   // Metronome defaults
   defaultBpm: 110,
@@ -758,11 +758,17 @@ window.CPR_CONFIG = {
     if (window.speechSynthesis) speechSynthesis.cancel();
     speechDone();
   }
+  // Same voice as the camera coach (British male if the device has one), so it's one coach you can talk to.
+  function coachVoice() {
+    const v = window.CPR_COACH && window.CPR_COACH.voice ? window.CPR_COACH.voice() : null;
+    return v && v.voice ? v : { voice: browserVoice, pitch: 1, rate: 0.98 };
+  }
   function speakBrowser(text) {
     if (!window.speechSynthesis) { speechDone(); return; }
     const u = new SpeechSynthesisUtterance(text);
-    if (browserVoice) u.voice = browserVoice;
-    u.rate = 0.98;
+    const cv = coachVoice();
+    if (cv.voice) { u.voice = cv.voice; u.lang = cv.voice.lang; }
+    u.pitch = cv.pitch; u.rate = cv.rate;
     u.onend = speechDone; u.onerror = speechDone;
     speechSynthesis.speak(u);
   }
@@ -1039,7 +1045,10 @@ window.CPR_CONFIG = {
     if (!$("voiceOn").checked || !window.speechSynthesis) return;
     if (window.CPR_AGENT && window.CPR_AGENT.isBusy()) return;   // don't talk over the assistant
     speechSynthesis.cancel();
-    speechSynthesis.speak(new SpeechSynthesisUtterance(text));
+    const u = new SpeechSynthesisUtterance(text);
+    const cv = window.CPR_COACH && window.CPR_COACH.voice ? window.CPR_COACH.voice() : null;   // same coach voice everywhere
+    if (cv && cv.voice) { u.voice = cv.voice; u.lang = cv.voice.lang; u.pitch = cv.pitch; u.rate = cv.rate; }
+    speechSynthesis.speak(u);
   }
 
   function setPhase(text, cls = "") {
@@ -2105,6 +2114,8 @@ window.CPR_CONFIG = {
   // Called by app.js when the Coach page is opened / left.
   window.CPR_COACH = {
     onShow() { loadModel().catch(() => {}); },
+    // The coach's British voice, shared so the assistant and metronome sound like the same coach.
+    voice: () => ({ voice, pitch: CONFIG.VOICE_PITCH, rate: CONFIG.VOICE_RATE }),
     onHide: stop,
     // Live numbers and the end-of-session summary, for other pages (training score, handoff report).
     status: () => analyzer.status(Math.max(lastT, 0)),
