@@ -1181,9 +1181,11 @@ window.CPR_CONFIG = {
     browserVoice = pickVoice();
     speechSynthesis.addEventListener?.("voiceschanged", () => { browserVoice = pickVoice(); });
   }
+  let tipsQuietUntil = 0;   // form tips wait this long after an answer, so they never step on it
   function speechDone() {
     if (!speaking) return;
     speaking = false; loading = false;
+    tipsQuietUntil = performance.now() + 6000;
     $("dockStop") && $("dockStop").classList.remove("show");
     handsFree.resume();
   }
@@ -1477,7 +1479,11 @@ window.CPR_CONFIG = {
       if (handsFree.isOn()) { handsFree.stop(); return; }
       handsFree.start({
         onText: heardSpeech,
-        onInterim: (t) => { if (!busy && !speaking && (cfg.wakeWord === false || WAKE.test(t) || performance.now() < armedUntil)) setStatus("Hearing: ", t); },
+        onInterim: (t) => {
+          if (busy || speaking || !(cfg.wakeWord === false || WAKE.test(t) || performance.now() < armedUntil)) return;
+          tipsQuietUntil = performance.now() + 4000;   // you're talking to the coach: hold the form tips
+          setStatus("Hearing: ", t);
+        },
         onState: micState,
       });
     });
@@ -1486,7 +1492,7 @@ window.CPR_CONFIG = {
   window.CPR_AGENT = {
     ask, speak, stopSpeaking, tapToTalk, handsFree, note,
     isSpeaking: () => speaking,
-    isBusy: () => busy || speaking,   // other voices on the page stay quiet while this is true
+    isBusy: () => busy || speaking || performance.now() < tipsQuietUntil,   // other voices stay quiet while this is true
     FALLBACK,
   };
 })();
@@ -1865,9 +1871,9 @@ window.CPR_CONFIG = {
     DEFAULT_CAMERA: 'user',   // 'user' = selfie cam (rescuer sees the screen) | 'environment' = back cam
 
     // Voice cues
-    WARMUP_COMPRESSIONS: 4,   // say nothing until this many pushes in a row
-    CUE_GAP_MS: 4000,         // minimum time between corrective cues
-    GOOD_CUE_GAP_MS: 10000,   // minimum time between "good rhythm" cues
+    WARMUP_COMPRESSIONS: 8,   // say nothing until this many pushes in a row
+    CUE_GAP_MS: 10000,        // minimum time between corrective cues (longer = talks less)
+    GOOD_CUE_GAP_MS: 25000,   // minimum time between "good rhythm" cues
     VOICE_NAMES: ['google uk english male', 'daniel', 'arthur', 'oliver', 'microsoft ryan', 'microsoft george'],
                               // voices to prefer, first match wins; then any British English voice; then the device default
     VOICE_PITCH: 0.9,         // 0..2, lower = deeper
