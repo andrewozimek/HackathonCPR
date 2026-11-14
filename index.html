@@ -107,16 +107,53 @@ a { color: var(--primary); }
 .brand-mark.sm { width: 24px; height: 24px; border-radius: 7px; }
 .brand-mark.sm .icon { width: 14px; height: 14px; }
 
-.nav { margin-left: auto; display: flex; align-items: center; gap: 2px; overflow-x: auto; scrollbar-width: none; }
-.nav a { padding: 8px 14px; border-radius: 999px; color: var(--muted); text-decoration: none; font-weight: 600; white-space: nowrap; transition: background .15s, color .15s; }
+/* Hamburger menu: button in the top bar opens a dropdown of the pages */
+.menu-btn {
+  display: grid; place-items: center; flex-shrink: 0; width: 46px; height: 46px; padding: 0;
+  border-radius: 14px; border: 1px solid var(--border); background: var(--surface); color: var(--text);
+  transition: background .15s, border-color .15s;
+}
+.menu-btn:hover { background: var(--surface-2); }
+.burger { position: relative; display: block; width: 20px; height: 14px; }
+.burger span { position: absolute; left: 0; width: 100%; height: 2px; border-radius: 2px; background: currentColor; transition: transform .25s cubic-bezier(.22, 1, .36, 1), opacity .15s, top .25s cubic-bezier(.22, 1, .36, 1); }
+.burger span:nth-child(1) { top: 0; }
+.burger span:nth-child(2) { top: 6px; }
+.burger span:nth-child(3) { top: 12px; }
+.topbar.menu-open .menu-btn { background: var(--primary-soft); border-color: color-mix(in srgb, var(--primary) 35%, var(--border)); color: var(--primary); }
+.topbar.menu-open .burger span:nth-child(1) { top: 6px; transform: rotate(45deg); }
+.topbar.menu-open .burger span:nth-child(2) { opacity: 0; }
+.topbar.menu-open .burger span:nth-child(3) { top: 6px; transform: rotate(-45deg); }
+
+.nav {
+  position: absolute; top: calc(100% + 8px); right: 24px; z-index: 1001;
+  display: flex; flex-direction: column; gap: 4px; width: min(300px, calc(100vw - 32px)); padding: 8px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 18px;
+  box-shadow: 0 24px 60px -12px rgba(15, 29, 46, .3);
+  opacity: 0; visibility: hidden; transform: translateY(-8px) scale(.98); transform-origin: top right;
+  transition: opacity .18s, transform .22s cubic-bezier(.22, 1, .36, 1), visibility 0s .22s;
+}
+.topbar.menu-open .nav { opacity: 1; visibility: visible; transform: none; transition: opacity .18s, transform .22s cubic-bezier(.22, 1, .36, 1); }
+.nav a { display: flex; align-items: center; gap: 12px; min-height: 50px; padding: 12px 14px; border-radius: 12px; color: var(--muted); text-decoration: none; font-weight: 600; font-size: 1.02rem; white-space: nowrap; transition: background .15s, color .15s; }
+.nav .icon { width: 20px; height: 20px; }
 .nav a:hover { color: var(--text); background: var(--surface-2); }
 .nav a.active { background: var(--primary-soft); color: var(--primary); }
+/* AI coach shortcut, to the left of the red phone button */
+.top-link {
+  display: flex; align-items: center; gap: 8px; flex-shrink: 0; white-space: nowrap; margin-left: auto;
+  min-height: 46px; padding: 0 16px; border-radius: 999px;
+  color: var(--muted); font-weight: 700; text-decoration: none; transition: background .15s, color .15s;
+}
+.top-link:hover { color: var(--text); background: var(--surface-2); }
+.top-link.active { background: var(--primary-soft); color: var(--primary); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary) 25%, transparent); }
+.top-link .short { display: none; }
+
+/* Emergency: round red phone button (icon only; the label is for screen readers) */
 .nav-emergency {
-  display: flex; align-items: center; gap: 8px; flex-shrink: 0; white-space: nowrap;
-  padding: 10px 18px; border-radius: 999px;
-  background: var(--danger); color: #fff; font-weight: 700; text-decoration: none;
+  display: grid; place-items: center; flex-shrink: 0; width: 46px; height: 46px; padding: 0;
+  border-radius: 50%; background: var(--danger); color: #fff; text-decoration: none;
   transition: background .15s;
 }
+.nav-emergency .icon { width: 21px; height: 21px; }
 .nav-emergency:hover { background: var(--danger-dark); }
 .nav-emergency.active { box-shadow: 0 0 0 4px var(--danger-soft); }
 
@@ -455,8 +492,6 @@ footer .brand { font-size: 1.05rem; color: #fff; }
 }
 @media (max-width: 640px) {
   .topbar { flex-wrap: wrap; height: auto; padding: 10px 16px 0; gap: 0 12px; }
-  .nav-emergency { margin-left: auto; padding: 8px 14px; }
-  .nav { order: 3; width: 100%; margin: 6px 0 0; padding-bottom: 8px; }
   main { padding: 0 16px 48px; }
   .page-head { padding-top: 36px; padding-bottom: 40px; }
   #coach .page-head { padding-bottom: 110px; }
@@ -631,38 +666,26 @@ footer { background: radial-gradient(600px 200px at 85% 0%, rgba(255, 61, 94, .1
   @keyframes ecg-scroll { to { background-position: -280px 0; } }
   .coach-box::after { inset: 10px; }
 }
-/* ===== Phone layout (bottom tab bar, portrait camera, thumb-sized controls) ===== */
+/* ===== Phone layout (hamburger menu, portrait camera, thumb-sized controls) ===== */
 html { -webkit-text-size-adjust: 100%; }
 a, button, label, input { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
-.nav .icon, .nav .short { display: none; }
 .coach-box { aspect-ratio: var(--cam-ar, 16 / 9); max-height: min(80vh, 780px); scroll-margin-top: 76px; }
 
 @media (max-width: 640px) {
-  body { padding-bottom: calc(74px + env(safe-area-inset-bottom)); }
-
-  /* One-row top bar: brand + Emergency only */
-  /* No backdrop-filter here: it would trap the fixed tab bar inside the top bar */
-  .topbar { flex-wrap: nowrap; gap: 12px; height: calc(58px + env(safe-area-inset-top)); padding: env(safe-area-inset-top) 16px 0; backdrop-filter: none; -webkit-backdrop-filter: none; background: var(--surface); }
+  /* One-row top bar: brand, Emergency, menu button */
+  .topbar { flex-wrap: nowrap; gap: 10px; height: calc(58px + env(safe-area-inset-top)); padding: env(safe-area-inset-top) 16px 0; }
   .brand { font-size: 1.12rem; }
   .brand-mark { width: 32px; height: 32px; }
-  .nav-emergency { margin-left: auto; min-height: 42px; padding: 0 16px; font-size: .95rem; }
+  .nav-emergency { width: 44px; height: 44px; }
+  .top-link { min-height: 42px; padding: 0 12px; font-size: .95rem; gap: 6px; }
+  .top-link .full, .top-link .icon { display: none; }
+  .top-link .short { display: inline; }
+  .topbar { gap: 8px; }
+  .menu-btn { width: 44px; height: 44px; }
 
-  /* Main pages move to a native-style tab bar at the bottom */
-  .nav {
-    position: fixed; z-index: 1000; left: 0; right: 0; bottom: 0; order: 0; width: auto; margin: 0;
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; overflow: visible;
-    padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
-    background: color-mix(in srgb, var(--surface) 84%, transparent);
-    backdrop-filter: saturate(180%) blur(18px); -webkit-backdrop-filter: saturate(180%) blur(18px);
-    border-top: 1px solid var(--border);
-    box-shadow: 0 -8px 24px -12px rgba(15, 29, 46, .18);
-  }
-  .nav a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 56px; padding: 6px 2px; border-radius: 14px; font-size: .74rem; font-weight: 700; line-height: 1.1; }
-  .nav .icon { display: block; width: 23px; height: 23px; transition: transform .25s var(--ease-out); }
-  .nav .full { display: none; }
-  .nav .short { display: inline; }
-  .nav a.active { background: var(--primary-soft); color: var(--primary); box-shadow: none; }
-  .nav a.active .icon { transform: translateY(-1px) scale(1.08); }
+  /* Menu drops down full width under the top bar */
+  .nav { left: 8px; right: 8px; width: auto; top: calc(100% + 6px); }
+  .nav a { min-height: 54px; font-size: 1.08rem; }
 
   .disclaimer { padding: 6px 12px; font-size: .8rem; }
   .disclaimer .long { display: none; }
@@ -677,11 +700,11 @@ a, button, label, input { -webkit-tap-highlight-color: transparent; touch-action
   #coach .page-head { padding-bottom: 92px; }
   .coach-grid { margin-top: -68px; gap: 16px; }
   .coach-main { gap: 12px; }
-  /* Edge-to-edge camera, as tall as fits between the top bar and the tab bar */
+  /* Edge-to-edge camera, as tall as fits between the top bar and the assistant bar */
   .coach-box {
     margin: 0 -16px; border-radius: 0; border-width: 1.5px 0;
     aspect-ratio: var(--cam-ar, 3 / 4);
-    max-height: calc(100svh - 58px - 74px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    max-height: calc(100svh - 58px - 112px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
     scroll-margin-top: calc(58px + env(safe-area-inset-top));
   }
   .coach-box::after { inset: 12px; }
@@ -734,9 +757,9 @@ a, button, label, input { -webkit-tap-highlight-color: transparent; touch-action
   .chat-form input { font-size: 16px; } /* 16px+ stops iOS zooming in on focus */
 }
 
-/* Phones: assistant bar sits just above the tab bar, compact */
+/* Phones: compact assistant bar at the bottom */
 @media (max-width: 640px) {
-  .agent-dock { bottom: calc(74px + env(safe-area-inset-bottom) + 6px); width: calc(100vw - 16px); padding: 6px; border-radius: 18px; z-index: 999; }
+  .agent-dock { bottom: calc(env(safe-area-inset-bottom) + 8px); width: calc(100vw - 16px); padding: 6px; border-radius: 18px; z-index: 999; }
   .dock-mic { height: 44px; padding: 0 12px; }
   .dock-form input { font-size: 16px; padding: 10px 14px; }   /* 16px+ stops iOS zooming in on focus */
   .dock-form button { width: 44px; height: 44px; }
@@ -744,16 +767,11 @@ a, button, label, input { -webkit-tap-highlight-color: transparent; touch-action
   .dock-answer { max-height: 40vh; overflow-y: auto; }
   main { padding-bottom: 130px; }   /* room for the assistant bar */
   body[data-page="assistant"] main { padding-bottom: 48px; }
-  /* Camera still fills the space between the top bar and the assistant bar */
-  .coach-box { max-height: calc(100svh - 58px - 74px - 112px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); }
 }
 
-/* Tablets: tighter top menu so every link fits */
-@media (min-width: 641px) and (max-width: 900px) {
-  .topbar { gap: 12px; padding: 0 20px; }
-  .nav a { padding: 8px 11px; }
-  .nav .full { display: none; }
-  .nav .short { display: inline; }
+/* Very narrow phones: drop the brand name so the top bar never overflows */
+@media (max-width: 360px) {
+  .topbar .brand > span:last-child { display: none; }
 }
 
 /* Phone turned sideways: keep the camera within the short screen */
@@ -795,13 +813,16 @@ a, button, label, input { -webkit-tap-highlight-color: transparent; touch-action
       <span class="brand-mark"><svg class="icon" width="20" height="20"><use href="#i-pulse"/></svg></span>
       <span>CPR Coach</span>
     </a>
-    <nav class="nav" aria-label="Main">
-      <a href="#coach"><svg class="icon" width="20" height="20" aria-hidden="true"><use href="#i-camera"/></svg><span class="full">AI form coach</span><span class="short">Coach</span></a>
+    <a href="#coach" class="top-link"><svg class="icon" width="20" height="20" aria-hidden="true"><use href="#i-camera"/></svg><span class="full">AI form coach</span><span class="short">AI coach</span></a>
+    <a href="#emergency" class="nav-emergency" aria-label="Emergency" title="Emergency"><svg class="icon" width="20" height="20" aria-hidden="true"><use href="#i-phone"/></svg></a>
+    <button id="menuBtn" class="menu-btn" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mainNav">
+      <span class="burger" aria-hidden="true"><span></span><span></span><span></span></span>
+    </button>
+    <nav id="mainNav" class="nav" aria-label="Main">
       <a href="#metronome"><svg class="icon" width="20" height="20" aria-hidden="true"><use href="#i-pulse"/></svg><span>Metronome</span></a>
       <a href="#learn"><svg class="icon" width="20" height="20" aria-hidden="true"><use href="#i-book"/></svg><span>Learn</span></a>
       <a href="#assistant"><svg class="icon" width="20" height="20" aria-hidden="true"><use href="#i-chat"/></svg><span>Ask</span></a>
     </nav>
-    <a href="#emergency" class="nav-emergency"><svg class="icon" width="20" height="20"><use href="#i-phone"/></svg>Emergency</a>
   </header>
 
   <div class="disclaimer">
@@ -2530,6 +2551,24 @@ window.CPR_CONFIG = {
 })();
 </script>
   <script>
+/* ===== menu.js ===== */
+// Hamburger menu: opens the page list; closes on a pick, a tap outside, or Escape.
+(function () {
+  const bar = document.querySelector('.topbar'), btn = document.getElementById('menuBtn'), nav = document.getElementById('mainNav');
+  if (!bar || !btn || !nav) return;
+  const isOpen = () => bar.classList.contains('menu-open');
+  function setOpen(open) {
+    bar.classList.toggle('menu-open', open);
+    btn.setAttribute('aria-expanded', String(open));
+    btn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+  }
+  btn.addEventListener('click', (e) => { e.stopPropagation(); setOpen(!isOpen()); });
+  nav.addEventListener('click', (e) => { if (e.target.closest('a')) setOpen(false); });
+  document.addEventListener('click', (e) => { if (isOpen() && !bar.contains(e.target)) setOpen(false); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && isOpen()) { setOpen(false); btn.focus(); } });
+  window.addEventListener('hashchange', () => setOpen(false));
+})();
+
 /* ===== reveal.js ===== */
 // Scroll reveal: fades cards in as they come into view (skipped for reduced motion).
 (function () {
@@ -2552,7 +2591,7 @@ window.CPR_CONFIG = {
     const page = document.getElementById(id) || document.getElementById("coach");
     document.querySelectorAll(".page").forEach((p) => p.classList.toggle("active", p === page));
     document.body.dataset.page = page.id;
-    document.querySelectorAll(".nav a, .nav-emergency").forEach((a) => a.classList.toggle("active", a.getAttribute("href") === "#" + page.id));
+    document.querySelectorAll(".nav a, .nav-emergency, .top-link").forEach((a) => a.classList.toggle("active", a.getAttribute("href") === "#" + page.id));
     // Leaving the Metronome page stops its beat, beeps and voice.
     if (page.id !== "metronome" && window.CPR_METRONOME) window.CPR_METRONOME.stop();
     // Prefetch the pose model on the Coach page; release the camera when leaving it.
