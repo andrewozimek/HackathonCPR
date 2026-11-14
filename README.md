@@ -6,7 +6,7 @@ One file: `index.html`. All the HTML, CSS and JavaScript are inside it, so it lo
 
 ## How to open it
 
-- Quickest: double-click `index.html`, or press F5 in VS Code ("Open index.html in Chrome"). In Chrome everything works, including the camera. Other browsers may block the camera on a file, so use the local server below.
+- Quickest: double-click `index.html`. In Chrome everything works, including the camera. Other browsers may block the camera on a file, so use the local server below.
 - Better (camera works): in this folder run `python3 -m http.server 8000`, then open http://localhost:8000 (or use VS Code "Live Server").
 - To share a live link: drag the folder onto Netlify Drop, or push it to GitHub and turn on GitHub Pages.
 
