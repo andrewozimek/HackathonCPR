@@ -1371,6 +1371,43 @@ window.CPR_CONFIG = {
     dockAsk(rest);
   }
 
+  /* ---------- live "how am I doing?" answers from the camera ---------- */
+  // Questions about your own performance are answered instantly from what the camera is measuring
+  // right now (rate, recoil, elbows, arm position, push depth, hands-on time), not from the guidelines.
+  const PERF_Q = /\b(how am i doing|how'?s it going|how(?:'s| is| are) my (?:form|cpr|technique|rate|pace|speed|compressions|elbows|arms|recoil|hands)|am i doing (?:it )?(?:right|ok|okay|good|well|this right)|is (?:this|my form|that) (?:right|good|ok|okay)|doing (?:ok|okay|good|well|right)|am i (?:going|pushing|doing) (?:it )?(?:too )?(?:fast|slow|hard|deep)|too (?:fast|slow)|fast enough|slow enough|(?:my|the) (?:elbows|arms|recoil|rate|pace|speed|shoulders)|what am i doing wrong|any (?:tips|feedback)|give me feedback|feedback|my score|what'?s my (?:rate|score|speed|pace))\b/i;
+  function formReport(q) {
+    const coach = window.CPR_COACH;
+    if (!coach || !coach.isRunning || !coach.isRunning() || !coach.status || !PERF_Q.test(q)) return null;
+    const s = coach.status();
+    const ql = q.toLowerCase();
+    if (/score/.test(ql) && coach.summary) {
+      const sum = coach.summary();
+      if (sum && sum.score !== null && sum.score !== undefined) return "Your score so far is " + sum.score + " out of 100. Keep going and press Finish when you're done.";
+    }
+    if (!s || !s.count) return "I can't see any compressions yet. Make sure your shoulders, elbows and hands are all in view of the camera, then start pushing.";
+    const rate = s.rate === null || s.rate === undefined ? null : Math.round(s.rate);
+    const rateLine = rate === null ? "Keep pushing for a few seconds so I can measure your rate."
+      : s.rateState === "slow" ? "You're at " + rate + " a minute. Push a bit faster, aim for 100 to 120."
+      : s.rateState === "fast" ? "You're at " + rate + " a minute. Slow down a little, to 100 to 120."
+      : "Your rate is " + rate + " a minute, right on target.";
+    const problems = [], good = [];
+    if (s.recoilState === "bad") problems.push("Let the chest come all the way back up after each push.");
+    else if (s.recoilState === "good") good.push("full recoil");
+    if (s.elbowState === "bad") problems.push("Your elbows are bent" + (s.elbowDeg ? " at about " + Math.round(s.elbowDeg) + " degrees" : "") + ". Lock your arms straight.");
+    else if (s.elbowState === "good") good.push("arms locked");
+    if (s.tiltState === "bad") problems.push("Get your shoulders right over your hands.");
+    if (s.pushState === "fading") problems.push("Your pushes are getting weaker. You may be tiring, so switch with someone if you can.");
+    if (s.handsState === "bad") problems.push("Keep your hands on the chest with fewer pauses.");
+    // A focused question gets a focused answer
+    if (/\b(fast|slow|rate|pace|speed)\b/.test(ql)) return rateLine;
+    if (/\b(elbow|arm|shoulder)/.test(ql)) return s.elbowState === "bad" || s.tiltState === "bad"
+      ? problems.filter((x) => /elbow|shoulder/i.test(x)).join(" ")
+      : "Your arms look good: straight and over your hands.";
+    if (/recoil|come up|chest/.test(ql)) return s.recoilState === "bad" ? "Let the chest come all the way back up after each push." : "Your recoil looks good. Keep letting the chest rise fully.";
+    if (!problems.length && s.rateState === "good") return "You're doing great. " + rateLine + (good.length ? " Good " + good.join(" and ") + "." : "") + " Keep it up.";
+    return [rateLine].concat(problems.slice(0, 2)).join(" ");
+  }
+
   /* ---------- one coach feed (full-screen coach panel) ---------- */
   function note(text, kind) {
     const feed = $("coachFeed");
@@ -1433,8 +1470,8 @@ window.CPR_CONFIG = {
     note(q, "you");
     const pending = note("...", "coach");
     const { session, mode } = context();
-    let answer;
-    try {
+    let answer = formReport(q);             // "how am I doing?" -> answered live from the camera
+    if (!answer) try {
       const data = await ask(q, { mode, session, history });
       answer = data.answer || (data.offline ? "The assistant isn't connected (chatUrl is empty)." : FALLBACK);
     } catch (err) {
@@ -2662,6 +2699,7 @@ window.CPR_CONFIG = {
   // Called by app.js when the Coach page is opened / left.
   window.CPR_COACH = {
     onShow() { loadModel().catch(() => {}); },
+    isRunning: () => running,
     // The coach's British voice, shared so the assistant and metronome sound like the same coach.
     voice: () => ({ voice, pitch: CONFIG.VOICE_PITCH, rate: CONFIG.VOICE_RATE }),
     onHide: stop,
