@@ -321,6 +321,21 @@ input[type="range"] { width: 100%; accent-color: var(--primary); }
 .fact h4 { display: inline-block; margin-bottom: 8px; padding: 3px 10px; border-radius: 999px; background: var(--primary-soft); color: var(--primary); font-size: .82rem; text-transform: uppercase; letter-spacing: .04em; }
 .fact p { margin: 0; font-size: 1.02rem; }
 
+/* Tutorial videos (Learn page, above the quiz) */
+.video-block { margin-top: 44px; }
+.video-block h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 4px; }
+.video-sub { margin: 0 0 18px; color: var(--muted); }
+.video-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.video-card { padding: 14px; }
+.video-frame { position: relative; aspect-ratio: 16 / 9; border-radius: var(--radius-sm); overflow: hidden; background: #000; }
+.video-thumb { position: absolute; inset: 0; display: block; }
+.video-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .25s, filter .25s; }
+.video-thumb:hover img, .video-thumb:focus-visible img { transform: scale(1.03); filter: brightness(.85); }
+.video-thumb .play { position: absolute; left: 50%; top: 50%; width: 68px; height: 48px; margin: -24px 0 0 -34px; border-radius: 14px; background: #e23b3b; box-shadow: 0 4px 16px rgba(0, 0, 0, .35); }
+.video-thumb .play::after { content: ""; position: absolute; left: 27px; top: 14px; border-left: 18px solid #fff; border-top: 10px solid transparent; border-bottom: 10px solid transparent; }
+.video-card h3 { font-size: 1rem; margin: 12px 0 4px; }
+.video-card a { font-weight: 700; color: var(--primary); }
+@media (max-width: 720px) { .video-grid { grid-template-columns: 1fr; } }
 .quiz-card { margin-top: 44px; padding: 28px; }
 .quiz-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 4px; }
 .quiz-head h2 { font-size: 1.5rem; font-weight: 800; }
@@ -1134,6 +1149,27 @@ body.coach-focus .agent-dock .beat-ctl { display: flex; flex-shrink: 0; margin: 
         <div class="fact"><h4>Breaths</h4><p>30:2 with one rescuer, 15:2 with two.</p></div>
       </div>
       <p class="note">Based on the 2025 American Heart Association CPR guidelines. Not a substitute for a certified CPR class.</p>
+
+      <div class="video-block">
+        <h2>Watch: CPR tutorials</h2>
+        <p class="video-sub">Two short videos that show the steps before you take the quiz.</p>
+        <div class="video-grid">
+          <div class="card video-card">
+            <div class="video-frame">
+              <a class="video-thumb" href="https://www.youtube.com/watch?v=-NodDRTsV88" target="_blank" rel="noopener noreferrer" aria-label="Watch on YouTube: How to do CPR on an Adult (Ages 12 and Older)"><img src="https://i.ytimg.com/vi/-NodDRTsV88/hqdefault.jpg" alt="" loading="lazy"><span class="play"></span></a>
+            </div>
+            <h3>How to do CPR on an adult</h3>
+            <a href="https://www.youtube.com/watch?v=-NodDRTsV88" target="_blank" rel="noopener noreferrer">Watch on YouTube</a>
+          </div>
+          <div class="card video-card">
+            <div class="video-frame">
+              <a class="video-thumb" href="https://www.youtube.com/watch?v=BUhUiPeEX-8" target="_blank" rel="noopener noreferrer" aria-label="Watch on YouTube: CPR tutorial video"><img src="https://i.ytimg.com/vi/BUhUiPeEX-8/hqdefault.jpg" alt="" loading="lazy"><span class="play"></span></a>
+            </div>
+            <h3>CPR tutorial video</h3>
+            <a href="https://www.youtube.com/watch?v=BUhUiPeEX-8" target="_blank" rel="noopener noreferrer">Watch on YouTube</a>
+          </div>
+        </div>
+      </div>
 
       <div class="card quiz-card">
         <div class="quiz-head">
@@ -3073,7 +3109,7 @@ if ('IntersectionObserver' in window) {
 // Scroll reveal: fades cards in as they come into view (skipped for reduced motion).
 (function () {
   if (!('IntersectionObserver' in window) || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  const groups = ['.metrics .metric', '.coach-side', '.section-title', '.tool-list li', '.home-grid > *', '.tab-panel .fact', '.quiz-card'];
+  const groups = ['.metrics .metric', '.coach-side', '.section-title', '.tool-list li', '.home-grid > *', '.tab-panel .fact', '.video-block', '.quiz-card'];
   const io = new IntersectionObserver((entries) => {
     entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
   }, { rootMargin: '0px 0px -8% 0px' });
