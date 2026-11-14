@@ -20,10 +20,9 @@ Search for these comment headers:
 |---|---|
 | `All styles` | All CSS. Colors are at the top in `:root`. |
 | `config.js` | Settings: `chatUrl` (the CPR agent), `naturalVoice`, metronome BPM, rescuer swap time. |
-| `agent.js` | The CPR agent: asking, natural voice, hands-free listening, and the assistant bar. |
+| `agent.js` | The CPR agent: asking, natural voice, hands-free listening, and the chat panel (conversation, patient age, read-aloud, sources). |
 | `metronome.js` | Start CPR: 110 bpm beat, 30:2 counter, 2-minute rescuer swap timer, beep and voice. |
 | `learn.js` | Learn tabs, Emergency steps, and the quiz questions (`QUIZ` array). |
-| `chat.js` | Ask page chat: mic, patient age, read-aloud, sources. |
 | `coach.js` | Camera coach: MediaPipe Pose tracks compression rate, chest recoil and elbow lock, with voice cues. Tuning values are in its `CONFIG` block. |
 | `app.js` | Switches pages using the URL hash (`#coach` is the main page, then `#metronome`, `#emergency`, ...). |
 
@@ -37,9 +36,8 @@ Where it shows up:
 
 | Where | What it does |
 |---|---|
-| Assistant bar (bottom of every page) | Type a question any time, or tap **Hands-free** once and say "Coach, ..." (for example "Coach, how deep?"). Saying just "Coach" gets a "Yes?" and it listens for your question. Starting the AI coach turns hands-free on automatically (`autoHandsFree: false` in the config to stop that). Turn the wake word off with `wakeWord: false`. Works while the metronome or camera coach is running: answers are short while CPR is going, the coach and metronome voices stay quiet while it answers, and a new question cuts off the old answer. |
+| Chat button (bottom-right of every page) | Opens a mini chat: the conversation, suggested questions, a patient age picker, **Read aloud**, and the guideline section each answer came from. Answers explain the why when you're not doing CPR, and are short while CPR is running. Type a question any time, or tap **Hands-free** once and say "Coach, ..." (for example "Coach, how deep?"). Saying just "Coach" gets a "Yes?" and it listens for your question. Starting the AI coach turns hands-free on automatically (`autoHandsFree: false` in the config to stop that). Turn the wake word off with `wakeWord: false`. Works while the metronome or camera coach is running: answers are short while CPR is going, the coach and metronome voices stay quiet while it answers, and a new question cuts off the old answer. |
 | AI coach (full screen) | Starting the AI coach goes full screen: camera on the left, one Coach panel on the right with Finish, Stop and Exit buttons. Form tips ("Push faster") and your questions and answers share one feed and one voice. |
-| Ask page | Full chat with explained answers, a tap-to-talk mic, patient age picker, read-aloud and the guideline section each answer came from. |
 
 Request / response (see `agent.js` in index.html):
 
@@ -52,7 +50,7 @@ POST /ask
 POST /tts   { "text": "..." }   -> MP3 audio
 ```
 
-Answers are spoken in the camera coach's British voice (`VOICE_NAMES` in the coach config), so the coach, metronome and assistant all sound like one coach. Set `naturalVoice: true` in the config to use the agent's Deepgram AI voice instead (about a second slower). If `chatUrl` is empty, the Ask page falls back to offline placeholder replies. Voice questions need Chrome or Edge; other browsers can still type. The agent's own test page is at `https://cpr-rag-agent.andrewozimek01.workers.dev/`.
+Answers are spoken in the camera coach's British voice (`VOICE_NAMES` in the coach config), so the coach, metronome and assistant all sound like one coach. Set `naturalVoice: true` in the config to use the agent's Deepgram AI voice instead (about a second slower). If `chatUrl` is empty, the chat says the assistant isn't connected. Voice questions need Chrome or Edge; other browsers can still type. The agent's own test page is at `https://cpr-rag-agent.andrewozimek01.workers.dev/`.
 
 ## Notes
 

@@ -193,9 +193,6 @@ main { flex: 1; width: 100%; max-width: 1120px; margin: 0 auto; padding: 0 32px 
 .page-head h1 { font-size: clamp(2.1rem, 4.8vw, 3.2rem); font-weight: 800; letter-spacing: -.025em; max-width: 18ch; }
 .page-head h1 br { display: none; }
 .lead { color: var(--hero-muted); font-size: 1.15rem; margin: 14px 0 0; max-width: 58ch; }
-.hero-points { display: flex; flex-wrap: wrap; gap: 10px 22px; margin: 22px 0 0; padding: 0; list-style: none; color: #dbe6f3; font-weight: 600; font-size: .95rem; }
-.hero-points li { display: flex; align-items: center; gap: 8px; }
-.hero-points .icon { color: #4ade80; }
 
 .note { color: var(--muted); font-size: .88rem; margin: 14px 0 0; }
 .section-title { margin: 56px 0 18px; font-size: 1.5rem; font-weight: 800; }
@@ -340,34 +337,15 @@ input[type="range"] { width: 100%; accent-color: var(--primary); }
 #quizSubmit { margin-top: 22px; }
 
 /* ===== Chat ===== */
-.chat-card { padding: 0; overflow: hidden; display: flex; flex-direction: column; max-width: 780px; }
-.chat-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 22px; border-bottom: 1px solid var(--border); }
-.chat-header small { color: var(--muted); font-size: .88rem; }
-.chat-log { height: 420px; overflow-y: auto; padding: 22px; display: flex; flex-direction: column; gap: 10px; background: var(--surface-2); }
-.msg { max-width: 78%; padding: 11px 16px; border-radius: 18px; white-space: pre-wrap; animation: rise .2s ease; }
-.msg.user { align-self: flex-end; background: var(--primary); color: #fff; border-bottom-right-radius: 6px; }
-.msg.bot { align-self: flex-start; background: var(--surface); border: 1px solid var(--border); border-bottom-left-radius: 6px; }
-.msg.typing { color: var(--muted); font-style: italic; }
-.chips { display: flex; gap: 8px; flex-wrap: wrap; padding: 14px 22px 0; }
 .chip { border: 1px solid var(--border); background: var(--surface); border-radius: 999px; padding: 6px 14px; font-size: .9rem; font-weight: 600; color: var(--primary); }
 .chip:hover { border-color: var(--primary); background: var(--primary-soft); }
-.chat-form { display: flex; gap: 8px; padding: 12px 22px 22px; }
-.chat-form input { flex: 1; font: inherit; color: var(--text); padding: 0 18px; height: 48px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); outline: none; }
-.chat-form input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-soft); }
-.chat-form button { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; border: 0; background: var(--primary); color: #fff; }
 /* ===== CPR agent (voice questions) ===== */
-.chat-form .mic-btn { background: var(--surface-2); color: var(--text); border: 1px solid var(--border); }
-.chat-form .mic-btn.listening { background: var(--brand); color: #fff; border-color: var(--brand); animation: pulse-ring 1.2s infinite; }
-.msg .sources { display: block; margin-top: 8px; font-size: .78rem; color: var(--muted); }
-.chat-opts { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; padding: 0 20px 16px; color: var(--muted); font-size: .85rem; }
-.chat-opts select { font: inherit; color: var(--text); background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px; padding: 6px 12px; }
 @keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(225,29,72,.45); } 100% { box-shadow: 0 0 0 14px rgba(225,29,72,0); } }
 
 /* Always-on assistant bar (every page except Ask, which has the full chat) */
 main { padding-bottom: 150px; }
 .agent-dock { position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); width: min(760px, calc(100vw - 24px)); z-index: 50;
   background: var(--surface); border: 1px solid var(--border); border-radius: 22px; box-shadow: 0 12px 40px rgba(15,23,42,.18); padding: 10px; }
-body[data-page="assistant"] .agent-dock { display: none; }
 .dock-answer { display: none; position: relative; margin: 2px 4px 10px; padding: 12px 40px 12px 14px; background: var(--blue-soft); border-left: 5px solid var(--blue); border-radius: 14px; }
 .dock-answer.show { display: block; animation: fade .2s ease; }
 .dock-answer .q { font-size: .8rem; color: var(--muted); margin-bottom: 3px; }
@@ -390,8 +368,8 @@ body[data-page="assistant"] .agent-dock { display: none; }
 @media (max-width: 560px) { .dock-mic .lbl { display: none; } }
 
 /* ===== AI form coach (main page) ===== */
-#coach .page-head { padding-bottom: 150px; margin-bottom: 0; }
-.coach-grid { position: relative; margin-top: -112px; display: grid; grid-template-columns: 2.1fr 1fr; gap: 20px; align-items: start; }
+#coach .page-head { margin-bottom: 40px; }
+.coach-grid { position: relative; display: grid; grid-template-columns: 2.1fr 1fr; gap: 20px; align-items: start; }
 .coach-main { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
 .coach-box { position: relative; background: #0a1626; border-radius: 20px; aspect-ratio: 16 / 9; overflow: hidden; box-shadow: var(--shadow-lg); border: 1px solid rgba(255, 255, 255, .08); }
 .coach-box canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
@@ -466,12 +444,9 @@ body[data-page="assistant"] .agent-dock { display: none; }
 .coach-steps { margin: 0 0 20px; padding: 0; list-style: none; counter-reset: cs; }
 .coach-steps li { counter-increment: cs; position: relative; padding: 4px 0 10px 40px; color: var(--muted); }
 .coach-steps li::before { content: counter(cs); position: absolute; left: 0; top: 2px; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--primary-soft); color: var(--primary); font-weight: 800; font-size: .9rem; }
-.coach-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0 24px; }
+.coach-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0 0; }
 .coach-controls .btn { min-height: 42px; font-size: .92rem; }
 .coach-controls .btn[aria-pressed="true"] { background: var(--primary-soft); border-color: var(--primary); color: var(--primary); }
-.coach-checks { list-style: none; margin: 0; padding: 0; color: var(--muted); font-size: .95rem; }
-.coach-checks li { padding: 8px 0; border-top: 1px solid var(--border); }
-.coach-checks strong { color: var(--text); }
 .coach-debug { display: none; background: #0a1626; border-radius: var(--radius-sm); padding: 10px; }
 .coach-debug.show { display: block; }
 #coachGraph { width: 100%; height: 90px; display: block; }
@@ -494,8 +469,6 @@ footer .brand { font-size: 1.05rem; color: #fff; }
   .topbar { flex-wrap: wrap; height: auto; padding: 10px 16px 0; gap: 0 12px; }
   main { padding: 0 16px 48px; }
   .page-head { padding-top: 36px; padding-bottom: 40px; }
-  #coach .page-head { padding-bottom: 110px; }
-  .coach-grid { margin-top: -80px; }
   .coach-placeholder span, .coach-placeholder .icon { display: none; }
   .page-head { background: radial-gradient(600px 300px at 90% -20%, var(--hero-2), transparent 70%), var(--hero); }
   .tool-list, .tab-panel, .stats { grid-template-columns: 1fr; }
@@ -566,8 +539,6 @@ h1, h2, .section-title, .quiz-head h2, .call-911 strong, .steps li h3,
 .eyebrow::before { animation: live 2s ease-in-out infinite; }
 @keyframes live { 50% { box-shadow: 0 0 0 7px rgba(74, 222, 128, 0); } }
 .lead { color: #aebfd6; }
-.hero-points { gap: 10px; }
-.hero-points li { padding: 7px 14px 7px 10px; border-radius: 999px; background: rgba(255, 255, 255, .06); border: 1px solid rgba(255, 255, 255, .1); backdrop-filter: blur(8px); color: #e6eef9; }
 
 /* Hero entrance */
 .page.active .page-head > * { animation: hero-in .8s var(--ease-out) both; }
@@ -578,7 +549,7 @@ h1, h2, .section-title, .quiz-head h2, .call-911 strong, .steps li h3,
 
 /* Buttons: gradient + glow + shine sweep */
 .btn { transition: transform .2s var(--ease-out), box-shadow .2s, background .15s, border-color .15s, color .15s; }
-.btn.primary, .big-btn.start, .coach-big-start, .tab.active, .chat-form button, .msg.user {
+.btn.primary, .big-btn.start, .coach-big-start, .tab.active {
   background: var(--grad-primary); color: #fff;
 }
 .btn.primary, .big-btn.start, .coach-big-start { position: relative; overflow: hidden; box-shadow: var(--glow-primary); }
@@ -666,6 +637,17 @@ footer { background: radial-gradient(600px 200px at 85% 0%, rgba(255, 61, 94, .1
   @keyframes ecg-scroll { to { background-position: -280px 0; } }
   .coach-box::after { inset: 10px; }
 }
+/* ===== Intro (first screen of the coach page; camera sits below it) ===== */
+.page-head.intro {
+  display: flex; flex-direction: column; align-items: flex-start; justify-content: center;
+  min-height: calc(100svh - 106px);   /* fills the screen under the top bar + notice */
+}
+.page-head.intro h1 { font-size: clamp(2.6rem, 6.4vw, 4.8rem); max-width: 13ch; }
+.page-head.intro .lead { font-size: clamp(1.08rem, 1.6vw, 1.25rem); max-width: 52ch; }
+.intro-cta { margin-top: 30px; min-height: 54px; padding: 0 28px; font-size: 1.08rem; }
+.intro-cta .icon { transform: rotate(90deg); animation: nudge-down 1.8s ease-in-out infinite; }
+@keyframes nudge-down { 0%, 100% { transform: rotate(90deg) translateX(0); } 50% { transform: rotate(90deg) translateX(4px); } }
+
 /* ===== Phone layout (hamburger menu, portrait camera, thumb-sized controls) ===== */
 html { -webkit-text-size-adjust: 100%; }
 a, button, label, input { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
@@ -694,11 +676,14 @@ a, button, label, input { -webkit-tap-highlight-color: transparent; touch-action
   .page-head { padding-top: 28px; padding-bottom: 32px; margin-bottom: 24px; }
   .page-head h1 { font-size: clamp(2rem, 9.5vw, 2.5rem); }
   .lead { font-size: 1.02rem; }
-  .hero-points { margin-top: 18px; gap: 8px; font-size: .88rem; }
 
   /* AI coach: tall portrait camera that fills the phone */
-  #coach .page-head { padding-bottom: 92px; }
-  .coach-grid { margin-top: -68px; gap: 16px; }
+  #coach .page-head { margin-bottom: 24px; }
+  /* Intro fills the phone screen; extra bottom room so the assistant bar never covers the button */
+  .page-head.intro { min-height: calc(100svh - 92px - env(safe-area-inset-top)); padding-bottom: 56px; }
+  .page-head.intro h1 { font-size: clamp(2.3rem, 11vw, 3rem); }
+  .intro-cta { width: 100%; }
+  .coach-grid { gap: 16px; }
   .coach-main { gap: 12px; }
   /* Edge-to-edge camera, as tall as fits between the top bar and the assistant bar */
   .coach-box {
@@ -747,14 +732,7 @@ a, button, label, input { -webkit-tap-highlight-color: transparent; touch-action
   .quiz-q label { min-height: 48px; }
 
   /* Ask */
-  .chat-card { max-width: none; }
-  .chat-header { flex-direction: column; align-items: flex-start; gap: 0; padding: 14px 16px; }
-  .chat-log { height: auto; min-height: 260px; max-height: calc(100svh - 470px); padding: 16px; }
-  .msg { max-width: 88%; }
-  .chips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding: 12px 16px 0; }
   .chip { flex-shrink: 0; min-height: 40px; }
-  .chat-form { padding: 12px 16px 16px; }
-  .chat-form input { font-size: 16px; } /* 16px+ stops iOS zooming in on focus */
 }
 
 /* ===== Full-screen AI coach: camera on the left, one Coach panel on the right ===== */
@@ -799,7 +777,53 @@ body.coach-focus .dock-mic { flex: 1 0 100%; justify-content: center; }
   .dock-status { font-size: .72rem; padding: 4px 6px 0; }
   .dock-answer { max-height: 40vh; overflow-y: auto; }
   main { padding-bottom: 130px; }   /* room for the assistant bar */
-  body[data-page="assistant"] main { padding-bottom: 48px; }
+}
+
+/* ===== Assistant as a corner chat widget: round button bottom-right opens a small panel ===== */
+main { padding-bottom: 96px; }
+.dock-fab {
+  position: fixed; right: 24px; bottom: 24px; z-index: 998;
+  display: grid; place-items: center; width: 60px; height: 60px; padding: 0; border: 0; border-radius: 50%;
+  background: var(--grad-primary); color: #fff;
+  box-shadow: 0 12px 30px -8px rgba(47, 107, 255, .6), 0 4px 12px rgba(15, 29, 46, .18);
+  transition: transform .2s var(--ease-out), box-shadow .2s;
+}
+.dock-fab:hover { transform: translateY(-2px) scale(1.04); }
+.dock-fab .icon { width: 26px; height: 26px; }
+.dock-fab .fab-close { display: none; font-size: 2rem; line-height: 1; margin-top: -3px; }
+.dock-fab.open .fab-open { display: none; }
+.dock-fab.open .fab-close { display: block; }
+.dock-fab .fab-dot { display: none; position: absolute; top: 3px; right: 3px; width: 15px; height: 15px; border-radius: 50%; background: #22c55e; border: 2.5px solid var(--surface); animation: live 2s ease-in-out infinite; }
+.dock-fab.live .fab-dot { display: block; }   /* hands-free is listening */
+
+.agent-dock {
+  left: auto; right: 24px; bottom: 98px; transform: translateY(12px) scale(.97); transform-origin: bottom right;
+  display: flex; flex-direction: column; width: min(380px, calc(100vw - 32px)); max-height: calc(100svh - 190px);
+  padding: 0; overflow: hidden; border-radius: 20px; z-index: 999;
+  box-shadow: 0 28px 70px -14px rgba(15, 29, 46, .38);
+  opacity: 0; visibility: hidden;
+  transition: opacity .18s, transform .22s var(--ease-out), visibility 0s .22s;
+}
+.agent-dock.open { opacity: 1; visibility: visible; transform: none; transition: opacity .18s, transform .22s var(--ease-out); }
+
+.dock-title {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 14px 14px 18px;
+  background: radial-gradient(300px 120px at 100% 0%, rgba(255, 61, 94, .25), transparent 70%), var(--hero); color: #fff;
+}
+.dock-title strong { display: block; font-family: var(--display); font-size: 1.05rem; }
+.dock-title small { display: block; color: var(--hero-muted); font-size: .8rem; }
+.dock-min { display: grid; place-items: center; flex-shrink: 0; width: 36px; height: 36px; padding: 0; border: 0; border-radius: 50%; background: rgba(255, 255, 255, .1); color: #fff; font-size: 1.4rem; line-height: 1; }
+.dock-min:hover { background: rgba(255, 255, 255, .2); }
+.agent-dock .dock-answer { margin: 12px 12px 0; overflow-y: auto; }
+.agent-dock .dock-bar { padding: 12px 12px 0; }
+.agent-dock .dock-status { padding: 8px 14px 14px; }
+
+@media (max-width: 640px) {
+  main { padding-bottom: 88px; }
+  .dock-fab { right: 16px; bottom: calc(16px + env(safe-area-inset-bottom)); width: 56px; height: 56px; }
+  .agent-dock { left: 8px; right: 8px; width: auto; bottom: calc(82px + env(safe-area-inset-bottom)); padding: 0; border-radius: 20px; max-height: calc(100svh - 160px); }
+  /* No bar at the bottom any more, so the camera can use nearly the full height */
+  .coach-box { max-height: calc(100svh - 58px - 16px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); }
 }
 
 /* Very narrow phones: drop the brand name so the top bar never overflows */
@@ -823,6 +847,47 @@ body.coach-focus .dock-mic { flex: 1 0 100%; justify-content: center; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
   .reveal { opacity: 1; transform: none; }
+}
+
+/* ===== Mini chat in the corner panel (replaces the old Ask page) ===== */
+.agent-dock .dock-answer { display: none !important; }   /* answers go into the conversation below instead */
+.agent-dock .coach-feed {
+  display: flex; flex-direction: column; gap: 8px; flex: 1 1 auto;
+  height: min(340px, 42svh); min-height: 140px; overflow-y: auto; padding: 14px 12px; background: var(--surface-2);
+}
+.agent-dock .feed-empty { margin: auto 8px; }
+.feed-msg { white-space: pre-wrap; }
+.feed-msg .sources { display: block; margin-top: 6px; font-size: .75rem; font-weight: 500; color: var(--muted); }
+.dock-chips { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 10px 12px 0; flex-shrink: 0; }
+.dock-chips .chip { flex-shrink: 0; min-height: 34px; padding: 5px 12px; font-size: .82rem; }
+.dock-opts { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; padding: 10px 14px 0; color: var(--muted); font-size: .82rem; flex-shrink: 0; }
+.dock-opts label { display: flex; align-items: center; gap: 6px; }
+.dock-opts select { font: inherit; color: var(--text); background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px; padding: 4px 10px; }
+.dock-opts .switch { flex-direction: row-reverse; justify-content: flex-end; gap: 8px; }
+.dock-opts .slider { width: 36px; height: 22px; }
+.dock-opts .slider::after { width: 16px; height: 16px; }
+.dock-opts .switch input:checked + .slider::after { transform: translateX(14px); }
+.agent-dock .dock-bar, .agent-dock .dock-status { flex-shrink: 0; }
+@media (max-width: 640px) {
+  .agent-dock .coach-feed { height: min(42svh, 360px); min-height: 120px; }
+  .dock-opts select { font-size: 16px; }   /* stops iOS zooming in */
+}
+
+/* ===== Coach view + chat widget together =====
+   Normal browsing: corner chat button opens the small "CPR assistant" panel.
+   Coach view (after Start AI coach): no corner button; the same panel becomes the full-height "Your coach" side panel. */
+body.coach-focus .topbar, body.coach-focus .disclaimer, body.coach-focus .dock-fab, body.coach-focus .dock-title { display: none; }
+body.coach-focus .agent-dock {
+  opacity: 1; visibility: visible; transform: none; transition: none;
+  max-height: none; overflow: hidden; background: var(--surface);
+}
+body.coach-focus .agent-dock .dock-bar { padding: 0; }
+body.coach-focus .dock-chips, body.coach-focus .dock-opts { display: none; }
+body.coach-focus .agent-dock .coach-feed { height: auto; min-height: 0; padding: 10px; border-radius: 14px; }
+body.coach-focus .agent-dock .dock-status { padding: 0 4px; }
+body.coach-focus .coach-box { margin: 0; border-radius: 16px; border-width: 1.5px; }   /* undo the phone edge-to-edge camera */
+@media (max-width: 900px) {
+  body.coach-focus .agent-dock { max-height: none; }
 }
 </style>
 </head>
@@ -854,7 +919,6 @@ body.coach-focus .dock-mic { flex: 1 0 100%; justify-content: center; }
     <nav id="mainNav" class="nav" aria-label="Main">
       <a href="#metronome"><svg class="icon" width="20" height="20" aria-hidden="true"><use href="#i-pulse"/></svg><span>Metronome</span></a>
       <a href="#learn"><svg class="icon" width="20" height="20" aria-hidden="true"><use href="#i-book"/></svg><span>Learn</span></a>
-      <a href="#assistant"><svg class="icon" width="20" height="20" aria-hidden="true"><use href="#i-chat"/></svg><span>Ask</span></a>
     </nav>
   </header>
 
@@ -906,7 +970,7 @@ body.coach-focus .dock-mic { flex: 1 0 100%; justify-content: center; }
     <!-- EMERGENCY -->
     <section id="emergency" class="page">
       <a class="call-911" href="tel:911">
-        <span><strong>Call 911 first</strong><small>Put the phone on speaker. Send someone for an AED.</small></span>
+        <span><strong>Call 911 first</strong><small>Put the phone on speaker. If there's an AED nearby, send someone to get it.</small></span>
         <span class="call-icon"><svg class="icon" width="20" height="20"><use href="#i-phone"/></svg></span>
       </a>
 
@@ -916,8 +980,8 @@ body.coach-focus .dock-mic { flex: 1 0 100%; justify-content: center; }
         <li><h3>Check for response</h3><p>Tap their shoulders and shout "Are you OK?"</p></li>
         <li><h3>Check breathing</h3><p>Look for normal breathing for no more than 10 seconds. Gasping is not normal breathing.</p></li>
         <li><h3>Start compressions</h3><p>Heel of your hand on the center of the chest, other hand on top. Push at least 2 inches deep, 100 to 120 times a minute.</p></li>
-        <li><h3>Use an AED as soon as it arrives</h3><p>Turn it on and follow its voice prompts.</p></li>
-        <li><h3>Keep going</h3><p>Do not stop until help takes over, the AED tells you to, or the person starts breathing.</p></li>
+        <li><h3>No AED? Keep pushing</h3><p>Don't wait for one and don't stop to look. Your compressions keep blood moving to the brain until help arrives. If someone does bring an AED, turn it on and follow its voice prompts.</p></li>
+        <li><h3>Keep going until help takes over</h3><p>Stop only when paramedics take over, an AED tells you to, the person starts breathing, or you can't physically go on. If someone else is there, swap every 2 minutes so your pushes stay strong.</p></li>
       </ol>
       <div class="step-nav">
         <button id="stepPrev" class="btn ghost">Back</button>
@@ -972,52 +1036,13 @@ body.coach-focus .dock-mic { flex: 1 0 100%; justify-content: center; }
       </div>
     </section>
 
-    <!-- ASSISTANT -->
-    <section id="assistant" class="page">
-      <div class="page-head">
-        <span class="eyebrow">Assistant</span>
-        <h1>Ask about <span class="grad">CPR</span></h1>
-        <p class="lead">Not for real emergencies. If someone needs help, call 911.</p>
-      </div>
-      <div class="card chat-card">
-        <div class="chat-header">
-          <strong>CPR Assistant</strong>
-          <small>AI answers grounded in the 2025 AHA CPR guidelines</small>
-        </div>
-        <div id="chatLog" class="chat-log">
-          <div class="msg bot">Hi! Ask me anything about CPR, AEDs, or this site.</div>
-        </div>
-        <div class="chips">
-          <button class="chip" data-q="How deep should compressions be?">How deep?</button>
-          <button class="chip" data-q="How fast should I push?">How fast?</button>
-          <button class="chip" data-q="How do I use an AED?">Using an AED</button>
-          <button class="chip" data-q="What changes for a child?">CPR on a child</button>
-          <button class="chip" data-q="How do I help a choking baby?">Choking baby</button>
-          <button class="chip" data-q="I heard a rib crack, should I stop?">Rib cracked?</button>
-        </div>
-        <form id="chatForm" class="chat-form">
-          <input id="chatInput" type="text" placeholder="Type a question, or tap the mic and talk..." autocomplete="off">
-          <button type="button" id="chatMic" class="mic-btn" aria-label="Tap to ask out loud" title="Tap, then ask out loud">&#127908;</button>
-          <button type="submit" aria-label="Send"><svg class="icon" width="20" height="20"><use href="#i-send"/></svg></button>
-        </form>
-        <div class="chat-opts">
-          <label>Patient <select id="chatPatient"><option value="unknown">Any age</option><option value="adult">Adult</option><option value="child">Child</option><option value="infant">Infant</option></select></label>
-          <label class="switch"><input id="chatSpeak" type="checkbox"><span class="slider"></span> Read answers aloud</label>
-        </div>
-      </div>
-    </section>
 
     <!-- AI FORM COACH (main page) -->
     <section id="coach" class="page">
-      <div class="page-head">
-        <span class="eyebrow">AI form coach</span>
-        <h1>Real-time feedback on <span class="grad">your CPR form</span></h1>
-        <p class="lead">Do compressions on a manikin or pillow in front of your camera. AI pose tracking watches your arms and tells you, out loud, how to fix your form, then scores you at the end.</p>
-        <ul class="hero-points">
-          <li><svg class="icon" width="20" height="20"><use href="#i-check"/></svg>7 live form checks</li>
-          <li><svg class="icon" width="20" height="20"><use href="#i-check"/></svg>Spoken corrections</li>
-          <li><svg class="icon" width="20" height="20"><use href="#i-check"/></svg>Video stays on your device</li>
-        </ul>
+      <div class="page-head intro">
+        <h1>Learn CPR with <span class="grad">an AI coach</span></h1>
+        <p class="lead">Practice chest compressions in front of your camera and get spoken tips on your form. A metronome, emergency steps and quick lessons are here when you need them.</p>
+        <button type="button" class="btn primary intro-cta" data-scroll-to=".coach-box">Start practicing <svg class="icon" width="20" height="20" aria-hidden="true"><use href="#i-arrow"/></svg></button>
       </div>
 
       <div class="coach-grid">
@@ -1080,16 +1105,6 @@ body.coach-focus .dock-mic { flex: 1 0 100%; justify-content: center; }
             <button id="coachReset" class="btn ghost">Reset</button>
             <button id="coachDebugBtn" class="btn ghost" aria-pressed="false">Debug</button>
           </div>
-
-          <h3>What the AI checks</h3>
-          <ul class="coach-checks">
-            <li><strong>Rate</strong> — counts each push from your wrist movement.</li>
-            <li><strong>Recoil</strong> — checks your hands come all the way back up.</li>
-            <li><strong>Elbows</strong> — measures the angle of your arms.</li>
-            <li><strong>Arms over chest</strong> — checks your shoulders stay above your hands.</li>
-            <li><strong>Hands-on time</strong> — how much of the session you spend compressing.</li>
-            <li><strong>Score</strong> — press Finish &amp; score for a summary out of 100.</li>
-          </ul>
         </div>
       </div>
 
@@ -1097,7 +1112,16 @@ body.coach-focus .dock-mic { flex: 1 0 100%; justify-content: center; }
   </main>
 
   <!-- Always-on CPR assistant: type or talk at any time, even while CPR is running -->
-  <div id="agentDock" class="agent-dock" aria-label="CPR assistant">
+  <button id="dockToggle" class="dock-fab" type="button" aria-label="Open CPR assistant" aria-expanded="false" aria-controls="agentDock">
+    <svg class="icon fab-open" width="20" height="20" aria-hidden="true"><use href="#i-chat"/></svg>
+    <span class="fab-close" aria-hidden="true">&times;</span>
+    <span class="fab-dot" aria-hidden="true"></span>
+  </button>
+  <div id="agentDock" class="agent-dock" role="dialog" aria-label="CPR assistant">
+    <div class="dock-title">
+      <div><strong>CPR assistant</strong><small>Ask anything, even mid-CPR</small></div>
+      <button class="dock-min" type="button" aria-label="Close assistant">&times;</button>
+    </div>
     <div class="dock-head">
       <div class="who"><span class="avatar"><svg class="icon" width="20" height="20"><use href="#i-pulse"/></svg></span><div>Your coach<small>Tips and answers, all in one place</small></div></div>
       <button id="focusFinish" class="btn primary" type="button">Finish &amp; score</button>
@@ -1105,7 +1129,16 @@ body.coach-focus .dock-mic { flex: 1 0 100%; justify-content: center; }
       <button id="focusFull" class="btn ghost" type="button">Full screen</button>
       <button id="focusExit" class="btn ghost" type="button">Exit coach view</button>
     </div>
-    <div id="coachFeed" class="coach-feed" aria-live="polite"><p class="feed-empty">Form tips and your answers show up here. Say "Coach, ..." or type a question.</p></div>
+    <div id="coachFeed" class="coach-feed" aria-live="polite"><p class="feed-empty">Hi! Ask me anything about CPR, AEDs or your form. Type below, or turn on Hands-free and say "Coach, ..."</p></div>
+    <div class="dock-chips" aria-label="Suggested questions">
+      <button type="button" class="chip" data-aed="none" data-q="There's no AED nearby. What should I do?">No AED nearby</button>
+      <button type="button" class="chip" data-q="How deep should compressions be?">How deep?</button>
+      <button type="button" class="chip" data-q="How fast should I push?">How fast?</button>
+      <button type="button" class="chip" data-q="How do I use an AED?">Using an AED</button>
+      <button type="button" class="chip" data-q="What changes for a child?">CPR on a child</button>
+      <button type="button" class="chip" data-q="How do I help a choking baby?">Choking baby</button>
+      <button type="button" class="chip" data-q="I heard a rib crack, should I stop?">Rib cracked?</button>
+    </div>
     <div id="dockAnswer" class="dock-answer" aria-live="polite"><button class="x" id="dockClose" aria-label="Hide answer">&times;</button><div class="q"></div><div class="a"></div></div>
     <div class="dock-bar">
       <button id="dockMic" class="dock-mic" aria-pressed="false" title="Hands-free: tap once, then just ask out loud"><span class="dot"></span><span class="lbl">Hands-free</span> &#127908;</button>
@@ -1113,6 +1146,11 @@ body.coach-focus .dock-mic { flex: 1 0 100%; justify-content: center; }
         <input id="dockInput" type="text" placeholder="Ask a CPR question anytime..." autocomplete="off" enterkeyhint="send">
         <button type="submit" aria-label="Ask"><svg class="icon" width="20" height="20"><use href="#i-send"/></svg></button>
       </form>
+    </div>
+    <div class="dock-opts">
+      <label>Patient <select id="dockPatient"><option value="unknown">Any age</option><option value="adult">Adult</option><option value="child">Child</option><option value="infant">Infant</option></select></label>
+      <label>AED <select id="dockAed"><option value="unknown">Not sure</option><option value="none">None nearby</option><option value="yes">Have one</option></select></label>
+      <label class="switch"><input id="dockSpeak" type="checkbox"><span class="slider"></span> Read aloud</label>
     </div>
     <div class="dock-status"><span id="dockStatus">Type a question, or tap Hands-free and just talk. Works while CPR is running.</span><button id="dockStop" class="dock-stop" type="button">Stop talking</button></div>
   </div>
@@ -1326,7 +1364,7 @@ window.CPR_CONFIG = {
     };
   })();
 
-  // One-shot tap-to-talk (the mic on the Ask page): tap, speak, it sends when you stop talking.
+  // One-shot tap-to-talk (not used on the page right now; kept for reuse): tap, speak, it sends when you stop talking.
   function tapToTalk(btn, { onText, onNoVoice }) {
     if (!SR) { btn.addEventListener("click", () => onNoVoice && onNoVoice()); return; }
     const r = new SR();
@@ -1443,8 +1481,8 @@ window.CPR_CONFIG = {
       active = true;
       session.elapsedSeconds = m.elapsedSeconds;
     }
-    // The bar always gets quick, short, action-first answers (the Ask page is for longer explanations).
-    return { session, mode: "emergency", active };
+    // During CPR (coach or metronome running): quick, action-first answers. Otherwise: fuller "training" answers that explain why.
+    return { session, mode: active ? "emergency" : "training", active };
   }
 
   function showAnswer(q, a, keep) {
@@ -1470,22 +1508,39 @@ window.CPR_CONFIG = {
     showAnswer(q, "Thinking...", true);
     note(q, "you");
     const pending = note("...", "coach");
-    const { session, mode } = context();
+    const { session, mode, active } = context();
+    const patient = $("dockPatient") ? $("dockPatient").value : "unknown";
+    // Tell the agent whether an AED is on hand, so answers fit (e.g. "no AED: keep pushing, here's how").
+    const aed = $("dockAed") ? $("dockAed").value : "unknown";
+    const sent = aed === "none" ? q + " (Note: there is no AED available.)"
+      : aed === "yes" ? q + " (Note: an AED is available.)" : q;
     let answer = formReport(q);             // "how am I doing?" -> answered live from the camera
+    let sources = [];
     if (!answer) try {
-      const data = await ask(q, { mode, session, history });
+      const data = await ask(sent, { mode, patient, session, history });
       answer = data.answer || (data.offline ? "The assistant isn't connected (chatUrl is empty)." : FALLBACK);
+      sources = [...new Set((data.sources || []).map((s) => s.section).filter(Boolean))];
     } catch (err) {
       console.error(err);
       answer = FALLBACK;
     }
     history.push({ role: "user", content: q }, { role: "assistant", content: answer });
     if (history.length > 8) history.splice(0, history.length - 8);
-    if (pending) pending.textContent = answer;
+    if (pending) {
+      pending.textContent = answer;
+      if (sources.length) {                 // which guideline sections the answer came from
+        const src = document.createElement("span");
+        src.className = "sources";
+        src.textContent = "From: " + sources.join(" · ");
+        pending.appendChild(src);
+      }
+      const feed = $("coachFeed"); if (feed) feed.scrollTop = feed.scrollHeight;
+    }
     if (mine !== askSeq) return;            // a newer question is already on its way
     showAnswer(q, answer);
     busy = false;
-    speak(answer);
+    // Speak during CPR, when talking hands-free, or when "Read aloud" is on; typed questions otherwise stay quiet.
+    if (active || handsFree.isOn() || ($("dockSpeak") && $("dockSpeak").checked)) speak(answer);
   }
 
   function micState(state) {
@@ -1733,6 +1788,7 @@ window.CPR_CONFIG = {
     { q: "What should you do first if someone collapses and is not breathing normally?", choices: ["Call 911 and start CPR", "Wait to see if they wake up", "Give them water"], answer: 0 },
     { q: "What is the compression-to-breath ratio for one rescuer on an adult?", choices: ["15:1", "30:2", "5:1"], answer: 1 },
     { q: "When an AED arrives, you should:", choices: ["Finish 10 more minutes of CPR first", "Turn it on and follow its prompts", "Only use it if you are a doctor"], answer: 1 },
+    { q: "There's no AED nearby. You should:", choices: ["Wait for someone to find one before starting", "Keep doing chest compressions until help takes over", "Stop CPR after 2 minutes"], answer: 1 },
     { q: "For an infant, you compress with:", choices: ["The heel of one hand or two thumbs encircling the chest", "Your whole palm with both hands", "Your elbow"], answer: 0 }
   ];
 
@@ -1787,90 +1843,6 @@ window.CPR_CONFIG = {
     setupTabs();
     setupSteps();
     setupQuiz();
-  });
-})();
-</script>
-  <script>
-/* ===== chat.js ===== */
-// Chat UI for the CPR RAG assistant (see agent.js for the request format).
-// Uses "training" mode so answers explain the why. If CPR_CONFIG.chatUrl is empty,
-// placeholderReply() answers instead.
-(function () {
-  const cfg = window.CPR_CONFIG;
-  const $ = (id) => document.getElementById(id);
-  const history = [];
-
-  function addMsg(text, who, extraClass = "") {
-    const div = document.createElement("div");
-    div.className = `msg ${who} ${extraClass}`;
-    div.textContent = text;
-    $("chatLog").appendChild(div);
-    $("chatLog").scrollTop = $("chatLog").scrollHeight;
-    return div;
-  }
-
-  // Tiny keyword stub so the demo works offline. Replace with the real backend.
-  function placeholderReply(message) {
-    const m = message.toLowerCase();
-    if (/\b(911|emergency|collapse|not breathing)\b/.test(m)) return "If this is a real emergency, call 911 now and open the Emergency tab.";
-    if (/deep|depth/.test(m)) return "For adults, push at least 2 inches (5 cm) deep and let the chest fully come back up. (Placeholder answer.)";
-    if (/fast|rate|bpm|speed/.test(m)) return "Aim for 100 to 120 compressions per minute. The Metronome tab runs at 110. (Placeholder answer.)";
-    if (/aed|defib/.test(m)) return "Turn the AED on and follow its voice prompts. Ask people nearby to find one. (Placeholder answer.)";
-    return "I'm a placeholder for now. Once the RAG assistant is connected (see config.js), I'll answer from our CPR knowledge base.";
-  }
-
-  async function ask(message) {
-    if (!cfg.chatUrl) {
-      await new Promise((r) => setTimeout(r, 400));
-      return { reply: placeholderReply(message), sources: [] };
-    }
-    const data = await window.CPR_AGENT.ask(message, { mode: "training", patient: $("chatPatient").value, history });
-    // Show which guideline sections the answer came from
-    const sources = [...new Set((data.sources || []).map((s) => s.section).filter(Boolean))];
-    return { reply: data.answer, sources };
-  }
-
-  async function onSubmit(e) {
-    e.preventDefault();
-    const input = $("chatInput");
-    const message = input.value.trim();
-    if (!message) return;
-    input.value = "";
-    addMsg(message, "user");
-    const typing = addMsg("Thinking...", "bot", "typing");
-    try {
-      const data = await ask(message);
-      typing.remove();
-      const reply = data.reply || "(no reply)";
-      const msg = addMsg(reply, "bot");
-      if (data.sources && data.sources.length) {
-        const src = document.createElement("span");
-        src.className = "sources";
-        src.textContent = "From: " + data.sources.join(" · ");
-        msg.appendChild(src);
-      }
-      if ($("chatSpeak").checked) window.CPR_AGENT.speak(reply);
-      history.push({ role: "user", content: message }, { role: "assistant", content: data.reply || "" });
-    } catch (err) {
-      typing.remove();
-      addMsg("Sorry, I couldn't reach the assistant (" + err.message + ").", "bot");
-    }
-  }
-
-  window.addEventListener("DOMContentLoaded", () => {
-    $("chatForm").addEventListener("submit", onSubmit);
-    // Tap the mic and ask out loud; it sends when you stop talking, and reads the answer back.
-    window.CPR_AGENT.tapToTalk($("chatMic"), {
-      onText: (text) => { $("chatSpeak").checked = true; $("chatInput").value = text; $("chatForm").requestSubmit(); },
-      onNoVoice: () => $("chatInput").focus(),
-    });
-    // Suggested-question chips
-    document.querySelectorAll(".chips .chip").forEach((chip) => {
-      chip.addEventListener("click", () => {
-        $("chatInput").value = chip.dataset.q;
-        $("chatForm").requestSubmit();
-      });
-    });
   });
 })();
 </script>
@@ -2586,8 +2558,6 @@ window.CPR_CONFIG = {
       startLoop();
       if (window.CPR_AGENT && source === 'camera') window.CPR_AGENT.autoHandsFree(true);   // talk to the coach right away
       fitBox();
-      // On phones, bring the camera view to the top so the live feedback fills the screen.
-      if (matchMedia('(max-width: 640px)').matches) view.parentElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } catch (e) {
       console.error(e);
       msg.className = 'coach-msg bad';
@@ -2752,11 +2722,58 @@ window.CPR_CONFIG = {
   window.addEventListener('hashchange', () => setOpen(false));
 })();
 
+/* ===== chat-widget.js ===== */
+// Corner chat button opens/closes the assistant panel. A new answer (e.g. from a hands-free
+// voice question) opens it automatically; a green dot on the button shows hands-free is listening.
+(function () {
+  const fab = document.getElementById('dockToggle'), dock = document.getElementById('agentDock');
+  if (!fab || !dock) return;
+  const mic = document.getElementById('dockMic'), input = document.getElementById('dockInput');
+  const isOpen = () => dock.classList.contains('open');
+  function setOpen(open, focusInput) {
+    dock.classList.toggle('open', open);
+    fab.classList.toggle('open', open);
+    fab.setAttribute('aria-expanded', String(open));
+    fab.setAttribute('aria-label', open ? 'Close CPR assistant' : 'Open CPR assistant');
+    // Focus the box on computers only; on phones it would pop the keyboard up straight away.
+    if (open && focusInput && input && matchMedia('(hover: hover)').matches) setTimeout(() => input.focus(), 120);
+  }
+  fab.addEventListener('click', () => setOpen(!isOpen(), true));
+  dock.querySelector('.dock-min').addEventListener('click', () => { setOpen(false); fab.focus(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && isOpen()) { setOpen(false); fab.focus(); } });
+  // A new message in the conversation (typed, spoken or a suggestion) opens the panel so you see the answer.
+  const feed = document.getElementById('coachFeed');
+  if (feed) new MutationObserver((list) => {
+    if (document.body.classList.contains('coach-focus')) return;   // coach view shows the feed itself
+    if (list.some((m) => [...m.addedNodes].some((n) => n.classList && !n.classList.contains('cue')))) setOpen(true);
+  }).observe(feed, { childList: true });
+  // Suggested-question buttons
+  dock.querySelectorAll('.dock-chips .chip').forEach((chip) => chip.addEventListener('click', () => {
+    if (!input) return;
+    if (chip.dataset.aed && document.getElementById('dockAed')) document.getElementById('dockAed').value = chip.dataset.aed;   // remember "no AED" for follow-ups
+    input.value = chip.dataset.q;
+    document.getElementById('dockForm').requestSubmit();
+  }));
+  // Old links to the Ask page (#assistant) open the chat panel instead.
+  const openFromHash = () => { if (location.hash === '#assistant') setOpen(true, true); };
+  window.addEventListener('hashchange', openFromHash);
+  openFromHash();
+  if (mic) new MutationObserver(() => fab.classList.toggle('live', mic.getAttribute('aria-pressed') === 'true'))
+    .observe(mic, { attributes: true, attributeFilter: ['aria-pressed'] });
+})();
+
+/* ===== scroll buttons ===== */
+// Buttons with data-scroll-to="<selector>" smoothly scroll that element into view (e.g. "Start practicing" -> camera).
+document.querySelectorAll('[data-scroll-to]').forEach((btn) => btn.addEventListener('click', () => {
+  const el = document.querySelector(btn.dataset.scrollTo);
+  if (el) el.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+}));
+
 /* ===== reveal.js ===== */
 // Scroll reveal: fades cards in as they come into view (skipped for reduced motion).
 (function () {
   if (!('IntersectionObserver' in window) || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  const groups = ['.metrics .metric', '.coach-side', '.section-title', '.tool-list li', '.home-grid > *', '.tab-panel .fact', '.quiz-card', '.chat-card'];
+  const groups = ['.metrics .metric', '.coach-side', '.section-title', '.tool-list li', '.home-grid > *', '.tab-panel .fact', '.quiz-card'];
   const io = new IntersectionObserver((entries) => {
     entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
   }, { rootMargin: '0px 0px -8% 0px' });
