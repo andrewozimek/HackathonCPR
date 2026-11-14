@@ -766,34 +766,56 @@ window.CPR_CONFIG = {
     u.onend = speechDone; u.onerror = speechDone;
     speechSynthesis.speak(u);
   }
+  // Speaks sentence by sentence: the first sentence starts playing as soon as its audio is ready
+  // (about a second) while the rest load in the background.
+  function splitSentences(text) {
+    return (text.match(/[^.!?]+[.!?]+["')]*\s*|[^.!?]+$/g) || [text]).map((x) => x.trim()).filter(Boolean);
+  }
+  function fetchVoice(text) {
+    return fetch(TTS_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text }) })
+      .then((r) => { if (!r.ok) throw new Error("tts " + r.status); return r.blob(); });
+  }
+  function playBlob(blob, mine) {
+    return new Promise((resolve, reject) => {
+      if (mine !== speakSeq) return resolve();
+      player.onended = resolve;
+      player.onerror = reject;
+      player.src = URL.createObjectURL(blob);
+      player.play().catch(reject);
+    });
+  }
   async function speak(text) {
     if (!text) return;
     stopSpeaking();
     const mine = ++speakSeq;
     speaking = true;
     $("dockStop") && $("dockStop").classList.add("show");
-    handsFree.pause();                       // don't let the mic hear the answer
+    handsFree.pause();                       // ignore the mic while the answer plays
     if (cfg.naturalVoice !== false && TTS_URL) {
-      loading = true;
+      const parts = splitSentences(text);
+      const audio = parts.map(fetchVoice);   // request every sentence at once
+      audio.forEach((p) => p.catch(() => {}));
+      let i = 0;
       try {
-        const r = await fetch(TTS_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text }) });
-        if (!r.ok) throw new Error("tts " + r.status);
-        const blob = await r.blob();
-        if (mine !== speakSeq) return;       // a newer answer (or Stop) took over
-        player.src = URL.createObjectURL(blob);
-        loading = false;
-        await player.play();
+        for (; i < parts.length; i++) {
+          loading = true;
+          const blob = await audio[i];
+          loading = false;
+          if (mine !== speakSeq) return;     // a newer answer (or Stop) took over
+          await playBlob(blob, mine);
+          if (mine !== speakSeq) return;
+        }
+        speechDone();
         return;
       } catch (err) {
         console.warn("Natural voice unavailable, using the browser voice", err);
         loading = false;
         if (mine !== speakSeq) return;
+        text = parts.slice(i).join(" ");     // finish the rest with the browser voice
       }
     }
     speakBrowser(text);
   }
-  player.onended = speechDone;
-  player.onerror = () => { if (!loading) speechDone(); };
   // Safety net in case the browser never reports that speech ended.
   setInterval(() => {
     if (speaking && !loading && player.paused && (!window.speechSynthesis || (!speechSynthesis.speaking && !speechSynthesis.pending))) speechDone();
@@ -805,15 +827,18 @@ window.CPR_CONFIG = {
     "lock your elbows", "let the chest come all the way up", "good rhythm", "push hard and fast", "keep your shoulders"];
   const norm = (t) => t.toLowerCase().replace(/[^a-z ]/g, "").replace(/\s+/g, " ").trim();
   const handsFree = (() => {
-    let rec = null, on = false, paused = false, handlers = {};
+    let rec = null, on = false, paused = false, quietUntil = 0, micStream = null, handlers = {};
     function build() {
       const r = new SR();
       r.lang = "en-US";
       r.continuous = true;
       r.interimResults = true;
       r.onresult = (e) => {
+        // While the assistant is talking (and just after), ignore what the mic hears.
+        const ignore = paused || speaking || performance.now() < quietUntil;
         for (let i = e.resultIndex; i < e.results.length; i++) {
           const res = e.results[i], text = res[0].transcript.trim();
+          if (ignore) continue;
           if (!res.isFinal) { handlers.onInterim && handlers.onInterim(text); continue; }
           const n = norm(text);
           if (n.split(" ").length < 2 || OWN_PHRASES.some((p) => n.includes(p))) continue;
@@ -823,16 +848,21 @@ window.CPR_CONFIG = {
       r.onerror = (e) => {
         if (e.error === "not-allowed" || e.error === "service-not-allowed") { on = false; handlers.onState && handlers.onState("denied"); }
       };
-      r.onend = () => {                 // Chrome stops after a silence; keep listening while hands-free is on
-        if (on && !paused) setTimeout(() => { if (on && !paused) { try { r.start(); } catch {} } }, 250);
+      r.onend = () => {                 // Chrome stops after a long silence; quietly start again
+        if (on) setTimeout(() => { if (on) { try { r.start(); } catch {} } }, 250);
       };
       return r;
     }
     return {
       supported: !!SR,
-      start(h) {
+      async start(h) {
         if (!SR) return false;
         handlers = h || handlers;
+        // Ask for the microphone once and keep it open, so Chrome doesn't ask again after every answer.
+        if (!micStream && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+          try { micStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } }); }
+          catch (err) { handlers.onState && handlers.onState("denied"); return false; }
+        }
         rec = rec || build();
         on = true; paused = false;
         try { rec.start(); } catch {}
@@ -840,15 +870,12 @@ window.CPR_CONFIG = {
         return true;
       },
       stop() { on = false; paused = false; try { rec && rec.abort(); } catch {} handlers.onState && handlers.onState("off"); },
-      pause() { if (!on || paused) return; paused = true; try { rec.abort(); } catch {} handlers.onState && handlers.onState("paused"); },
+      pause() { if (!on || paused) return; paused = true; handlers.onState && handlers.onState("paused"); },
       resume() {
         if (!on || !paused) return;
-        setTimeout(() => {           // small gap so the tail of the answer isn't picked up
-          if (!on || !paused || speaking) return;
-          paused = false;
-          try { rec.start(); } catch {}
-          handlers.onState && handlers.onState("on");
-        }, 400);
+        paused = false;
+        quietUntil = performance.now() + 700;   // skip the tail end of the answer
+        handlers.onState && handlers.onState("on");
       },
       isOn: () => on,
     };
@@ -892,9 +919,8 @@ window.CPR_CONFIG = {
       active = true;
       session.elapsedSeconds = m.elapsedSeconds;
     }
-    const page = document.body.dataset.page;
-    // Short, action-first answers while CPR is going (or on the Emergency page); fuller answers otherwise.
-    return { session, mode: active || page === "emergency" ? "emergency" : "training" };
+    // The bar always gets quick, short, action-first answers (the Ask page is for longer explanations).
+    return { session, mode: "emergency", active };
   }
 
   function showAnswer(q, a, keep) {
