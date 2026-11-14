@@ -757,6 +757,39 @@ a, button, label, input { -webkit-tap-highlight-color: transparent; touch-action
   .chat-form input { font-size: 16px; } /* 16px+ stops iOS zooming in on focus */
 }
 
+/* ===== Full-screen AI coach: camera on the left, one Coach panel on the right ===== */
+.dock-head, .coach-feed { display: none; }
+body.coach-focus { overflow: hidden; }
+body.coach-focus #coach { position: fixed; inset: 0; z-index: 900; margin: 0; max-width: none; padding: 16px 412px 16px 16px; background: #07101c; overflow: hidden; }
+body.coach-focus #coach .page-head, body.coach-focus #coach .coach-side, body.coach-focus #coach .coach-debug { display: none; }
+body.coach-focus .coach-grid { margin: 0; height: 100%; grid-template-columns: 1fr; }
+body.coach-focus .coach-main { height: 100%; gap: 12px; }
+body.coach-focus .coach-box { flex: 1; min-height: 0; max-height: none; aspect-ratio: auto; }
+body.coach-focus .metrics { grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
+body.coach-focus .metric { padding: 10px 12px; }
+body.coach-focus .metric .t { display: none; }
+body.coach-focus .agent-dock { top: 16px; bottom: 16px; right: 16px; left: auto; transform: none; width: 380px; display: flex; flex-direction: column; gap: 10px; z-index: 1000; border-radius: 20px; padding: 14px; }
+body.coach-focus .dock-answer { display: none !important; }
+body.coach-focus .dock-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.dock-head .who { flex: 1 0 100%; display: flex; align-items: center; gap: 10px; font: 800 1.15rem var(--font-head, inherit); }
+.dock-head .who small { display: block; font: 500 .78rem var(--font-body, inherit); color: var(--muted); }
+.dock-head .avatar { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; color: #fff; background: var(--brand, #e11d48); }
+.dock-head .btn { flex: 1; min-height: 38px; padding: 6px 10px; font-size: .85rem; }
+body.coach-focus .coach-feed { display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 0; overflow-y: auto; padding: 10px; background: var(--surface-2); border-radius: 14px; }
+.feed-msg { max-width: 92%; padding: 9px 12px; border-radius: 14px; line-height: 1.4; font-size: .95rem; animation: fade .2s ease; }
+.feed-msg.coach { align-self: flex-start; background: var(--surface); border: 1px solid var(--border); font-weight: 600; }
+.feed-msg.you { align-self: flex-end; background: var(--brand, #e11d48); color: #fff; }
+.feed-msg.cue { align-self: flex-start; background: transparent; color: var(--muted); font-size: .85rem; padding: 2px 6px; }
+.feed-msg.cue::before { content: "Coach: "; font-weight: 700; }
+.feed-empty { color: var(--muted); font-size: .85rem; text-align: center; margin: auto 0; }
+body.coach-focus .dock-bar { flex-wrap: wrap; }
+body.coach-focus .dock-mic { flex: 1 0 100%; justify-content: center; }
+@media (max-width: 900px) {
+  body.coach-focus #coach { padding: 8px 8px 46vh; }
+  body.coach-focus .agent-dock { top: auto; left: 8px; right: 8px; bottom: 8px; width: auto; height: 44vh; }
+  body.coach-focus .metrics { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
 /* Phones: compact assistant bar at the bottom */
 @media (max-width: 640px) {
   .agent-dock { bottom: calc(env(safe-area-inset-bottom) + 8px); width: calc(100vw - 16px); padding: 6px; border-radius: 18px; z-index: 999; }
@@ -1065,6 +1098,13 @@ a, button, label, input { -webkit-tap-highlight-color: transparent; touch-action
 
   <!-- Always-on CPR assistant: type or talk at any time, even while CPR is running -->
   <div id="agentDock" class="agent-dock" aria-label="CPR assistant">
+    <div class="dock-head">
+      <div class="who"><span class="avatar"><svg class="icon" width="20" height="20"><use href="#i-pulse"/></svg></span><div>Your coach<small>Tips and answers, all in one place</small></div></div>
+      <button id="focusFinish" class="btn primary" type="button">Finish &amp; score</button>
+      <button id="focusStop" class="btn ghost" type="button">Stop</button>
+      <button id="focusExit" class="btn ghost" type="button">Exit full screen</button>
+    </div>
+    <div id="coachFeed" class="coach-feed" aria-live="polite"><p class="feed-empty">Form tips and your answers show up here. Say "Coach, ..." or type a question.</p></div>
     <div id="dockAnswer" class="dock-answer" aria-live="polite"><button class="x" id="dockClose" aria-label="Hide answer">&times;</button><div class="q"></div><div class="a"></div></div>
     <div class="dock-bar">
       <button id="dockMic" class="dock-mic" aria-pressed="false" title="Hands-free: tap once, then just ask out loud"><span class="dot"></span><span class="lbl">Hands-free</span> &#127908;</button>
@@ -1087,6 +1127,7 @@ window.CPR_CONFIG = {
   // CPR RAG agent (Cloudflare Worker + Workers AI). Leave empty ("") to use the offline placeholder replies.
   //   (the agent also serves a natural voice at the same address with /tts instead of /ask)
   chatUrl: "https://cpr-rag-agent.andrewozimek01.workers.dev/ask",
+  wakeWord: true,       // hands-free only answers when you start with "Coach", e.g. "Coach, how deep?"
   naturalVoice: false,  // false = answers use the camera coach's British voice (instant); true = Deepgram AI voice from the agent
 
   // Metronome defaults
@@ -1241,7 +1282,7 @@ window.CPR_CONFIG = {
           if (ignore) continue;
           if (!res.isFinal) { handlers.onInterim && handlers.onInterim(text); continue; }
           const n = norm(text);
-          if (n.split(" ").length < 2 || OWN_PHRASES.some((p) => n.includes(p))) continue;
+          if (OWN_PHRASES.some((p) => n.includes(p))) continue;
           handlers.onText && handlers.onText(text);
         }
       };
@@ -1302,6 +1343,48 @@ window.CPR_CONFIG = {
     });
   }
 
+  /* ---------- wake word: "Coach, ..." ---------- */
+  // Speech recognition often hears "coach" as coat / couch / Koch, so accept those too.
+  const WAKE = /^\s*(?:hey|ok|okay|hi)?[\s,]*(?:coach(?:es|'s)?|coat|couch|koch|kooch)\b[\s,.!?:]*/i;
+  let armedUntil = 0;
+  function heardSpeech(text) {
+    if (cfg.wakeWord === false) {
+      if (norm(text).split(" ").length >= 2) dockAsk(text);
+      return;
+    }
+    const m = text.match(WAKE);
+    const rest = m ? text.slice(m[0].length).trim() : text.trim();
+    if (!m && performance.now() > armedUntil) {             // no wake word: ignore it
+      setStatus('Say "Coach" first, e.g. "Coach, how deep do I push?"');
+      return;
+    }
+    if (norm(rest).split(" ").filter(Boolean).length < 2) {  // just "Coach": answer, then listen for the question
+      armedUntil = performance.now() + 9000;
+      speak("Yes?");
+      setStatus("Go ahead, I'm listening...");
+      return;
+    }
+    armedUntil = 0;
+    dockAsk(rest);
+  }
+
+  /* ---------- one coach feed (full-screen coach panel) ---------- */
+  function note(text, kind) {
+    const feed = $("coachFeed");
+    if (!feed || !text) return null;
+    const empty = feed.querySelector(".feed-empty"); if (empty) empty.remove();
+    const last = feed.lastElementChild;
+    if (kind === "cue" && last && last.classList.contains("cue") && last.dataset.text === text) return last;   // don't repeat the same tip
+    const el = document.createElement("div");
+    el.className = "feed-msg " + kind;
+    el.dataset.text = text;
+    el.textContent = text;
+    feed.appendChild(el);
+    while (feed.children.length > 60) feed.firstElementChild.remove();
+    feed.scrollTop = feed.scrollHeight;
+    return el;
+  }
+
   /* ---------- the always-on assistant bar ---------- */
   const history = [];
   let busy = false, hideTimer = 0, askSeq = 0;
@@ -1344,6 +1427,8 @@ window.CPR_CONFIG = {
     const mine = ++askSeq;
     busy = true;
     showAnswer(q, "Thinking...", true);
+    note(q, "you");
+    const pending = note("...", "coach");
     const { session, mode } = context();
     let answer;
     try {
@@ -1355,6 +1440,7 @@ window.CPR_CONFIG = {
     }
     history.push({ role: "user", content: q }, { role: "assistant", content: answer });
     if (history.length > 8) history.splice(0, history.length - 8);
+    if (pending) pending.textContent = answer;
     if (mine !== askSeq) return;            // a newer question is already on its way
     showAnswer(q, answer);
     busy = false;
@@ -1365,7 +1451,7 @@ window.CPR_CONFIG = {
     const btn = $("dockMic");
     btn.setAttribute("aria-pressed", state === "on" || state === "paused");
     btn.classList.toggle("paused", state === "paused");
-    if (state === "on") setStatus("Listening... just ask your question out loud.");
+    if (state === "on") setStatus(cfg.wakeWord === false ? "Listening... just ask your question out loud." : 'Listening... start with "Coach", e.g. "Coach, how deep?"');
     else if (state === "paused") setStatus("Answering...");
     else if (state === "denied") setStatus("Microphone is blocked. Allow it in the browser's address bar, or type instead.");
     else setStatus("Type a question, or tap Hands-free and just talk. Works while CPR is running.");
@@ -1389,15 +1475,15 @@ window.CPR_CONFIG = {
     mic.addEventListener("click", () => {
       if (handsFree.isOn()) { handsFree.stop(); return; }
       handsFree.start({
-        onText: (t) => dockAsk(t),
-        onInterim: (t) => { if (!busy && !speaking) setStatus("Hearing: ", t); },
+        onText: heardSpeech,
+        onInterim: (t) => { if (!busy && !speaking && (cfg.wakeWord === false || WAKE.test(t) || performance.now() < armedUntil)) setStatus("Hearing: ", t); },
         onState: micState,
       });
     });
   });
 
   window.CPR_AGENT = {
-    ask, speak, stopSpeaking, tapToTalk, handsFree,
+    ask, speak, stopSpeaking, tapToTalk, handsFree, note,
     isSpeaking: () => speaking,
     isBusy: () => busy || speaking,   // other voices on the page stay quiet while this is true
     FALLBACK,
@@ -2148,6 +2234,7 @@ window.CPR_CONFIG = {
   function say(key) {
     if (window.CPR_AGENT && window.CPR_AGENT.isBusy()) return;   // the assistant is answering a question
     const text = CUES[key];
+    if (window.CPR_AGENT) window.CPR_AGENT.note(text, "cue");      // tips and answers share one feed
     const el = $('coachCue');
     el.textContent = text;
     el.className = 'coach-cue show ' + (key === 'good' ? 'good' : 'warn');
@@ -2445,6 +2532,7 @@ window.CPR_CONFIG = {
         : e.name === 'NotAllowedError' ? 'Camera permission was blocked. Allow it and try again.'
         : e.name === 'NotFoundError' ? 'No camera found on this device.'
         : 'Could not start: ' + (e.message || e.name);
+      exitFocus();   // leave full screen so the error message is easy to see
       if (!stream && !video.getAttribute('src')) stop(true);   // the previous source was closed, so tidy the UI
     } finally {
       btn.disabled = false;
@@ -2472,19 +2560,36 @@ window.CPR_CONFIG = {
     $('coachPlaceholder').style.display = 'flex';
     $('coachStart').textContent = 'Start AI coach';
     $('coachTime').textContent = '';
+    exitFocus();
   }
+
+  /* ---------- full-screen coach mode ---------- */
+  // Starting the coach fills the screen: camera on the left, the Coach panel (tips + Q&A) on the right.
+  function enterFocus() {
+    document.body.classList.add('coach-focus');
+    const el = document.documentElement;
+    if (!document.fullscreenElement && el.requestFullscreen) el.requestFullscreen().catch(() => {});   // needs a click; fine if refused
+  }
+  function exitFocus() {
+    document.body.classList.remove('coach-focus');
+    if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {});
+  }
+  document.addEventListener('fullscreenchange', () => {
+    // Pressing Esc leaves full screen: go back to the normal page layout too (the camera keeps running).
+    if (!document.fullscreenElement && document.body.classList.contains('coach-focus')) document.body.classList.remove('coach-focus');
+  });
 
   /* ---------- buttons ---------- */
   window.addEventListener('DOMContentLoaded', () => {
     video = $('coachVideo'); view = $('coachView'); ctx = view.getContext('2d');
     graph = $('coachGraph'); gctx = graph.getContext('2d');
 
-    $('coachStart').addEventListener('click', () => (running ? stop() : start(openCamera, 'camera')));
+    $('coachStart').addEventListener('click', () => { if (running) stop(); else { enterFocus(); start(openCamera, 'camera'); } });
     $('coachPlaceholderStart').addEventListener('click', () => $('coachStart').click());
 
     $('coachFile').addEventListener('change', (e) => {
       const f = e.target.files[0];
-      if (f) start(() => openFile(URL.createObjectURL(f)), 'file');
+      if (f) { enterFocus(); start(() => openFile(URL.createObjectURL(f)), 'file'); }
       e.target.value = '';
     });
     video.addEventListener('ended', () => { if (running && source === 'file') showScore(); });
@@ -2527,6 +2632,11 @@ window.CPR_CONFIG = {
       render(analyzer.status(0), true);
       if (source === 'file') { video.currentTime = 0; try { await video.play(); } catch (e) { console.error(e); } }
     });
+
+    // Buttons in the full-screen Coach panel
+    $('focusFinish').addEventListener('click', () => $('coachFinish').click());
+    $('focusStop').addEventListener('click', () => { if (running) stop(); else exitFocus(); });
+    $('focusExit').addEventListener('click', () => { document.body.classList.remove('coach-focus'); if (document.fullscreenElement) document.exitFullscreen().catch(() => {}); });
 
     $('coachDebugBtn').addEventListener('click', (e) => {
       debugOn = !debugOn;

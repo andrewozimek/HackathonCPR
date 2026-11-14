@@ -37,7 +37,8 @@ Where it shows up:
 
 | Where | What it does |
 |---|---|
-| Assistant bar (bottom of every page) | Type a question any time, or tap **Hands-free** once and just talk. Works while the metronome or camera coach is running: answers are short while CPR is going, the coach and metronome voices stay quiet while it answers, and a new question cuts off the old answer. |
+| Assistant bar (bottom of every page) | Type a question any time, or tap **Hands-free** once and say "Coach, ..." (for example "Coach, how deep?"). Saying just "Coach" gets a "Yes?" and it listens for your question. Turn the wake word off with `wakeWord: false` in the config. Works while the metronome or camera coach is running: answers are short while CPR is going, the coach and metronome voices stay quiet while it answers, and a new question cuts off the old answer. |
+| AI coach (full screen) | Starting the AI coach goes full screen: camera on the left, one Coach panel on the right with Finish, Stop and Exit buttons. Form tips ("Push faster") and your questions and answers share one feed and one voice. |
 | Ask page | Full chat with explained answers, a tap-to-talk mic, patient age picker, read-aloud and the guideline section each answer came from. |
 
 Request / response (see `agent.js` in index.html):
